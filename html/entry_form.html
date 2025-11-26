@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/entry_form.css">
+    <title>Entry Form</title>
+    <script src="/js/entryForm.js" defer></script>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Upload A Recipe</h2>
+            </div>
+            <form>
+                <div>
+                    <div class="top-container">
+                        <div class="top-labels">
+                            <p>Recipe Name</p>
+                            <p>Description</p>
+                        </div>
+                        <div class="name-desc-input">
+                            <input class="recipe-input">
+                            <textarea class="input-textbox"></textarea>
+                        </div>
+                    </div>
+                    <div class="image-container">
+                        <p>Image</p>
+                        <label id="drop-area">
+                            <input id="input-file" type="file" accept="image/*" hidden>
+                            <div id="img-view">
+                                <img src="/icons/upload_icon_transparent.png" />
+                                <p>Drag and drop or click here to <br>upload image</p>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="bottom-container">
+                        <div class="bottom-labels">
+                            <p>Ingridients</p>
+                            <p>Directions</p>
+                        </div>
+                        <div class="bottom-input-container">
+                            <textarea class="input-textbox"></textarea>
+                            <textarea class="input-textbox"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="submit-button-container">
+                    <input type="submit" class="submit-button">
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

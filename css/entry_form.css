@@ -1,0 +1,115 @@
+body {
+    height: 100vh;
+    width: 100vw;
+    padding: 0;
+    margin: 0;
+}
+
+.wrapper {
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+    margin-top: 30px;
+}
+
+.form-container {
+    border-radius: 20px;
+    width: 40vw;
+    padding: 30px;
+    height: 80vh;
+}
+
+.form-header {
+    display: flex;
+    justify-content: center;
+}
+
+.top-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas: 
+        "label input"
+        "label input";
+}
+
+.input-textbox {
+    height: 10vh;
+}
+
+.top-labels {
+    grid-area: label;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.bottom-labels {
+    grid-area: label;
+    display: flex;
+    flex-direction: column;
+    gap: 11vh;
+}
+
+.bottom-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    grid-template-areas: 
+        "label input"
+        "label input";
+}
+
+.name-desc-input {
+    grid-area: input;
+    display: flex;
+    flex-direction: column;
+    gap: 45px;
+    width: 30vw;
+    margin-top: 1rem;
+}
+
+.bottom-input-container {
+    grid-area: input;
+    display: flex;
+    flex-direction: column;
+    gap: 45px;
+    width: 30vw;
+    margin-top: 1rem;
+}
+
+.recipe-input {
+    height: 25px;
+}
+
+#drop-area {
+    width: 500px;
+    height: 300px;
+    padding: 30px;
+    text-align: center;
+    border-radius: 20px;
+}
+
+#img-view {
+    border-radius: 20px;
+    border: 2px dashed #F47521;
+    background: #faf5f1;
+    background-position: center;
+    background-size: cover;
+}
+
+#img-view img {
+    width: 100px;
+    margin-top: 25px;
+}
+
+.submit-button {
+    margin-top: 1rem;
+    width: 40vw;
+    padding: 10px;
+    border: 0;
+    border-radius: 15px;
+    background-color: #F47521;
+    color: white;
+    font-size: larger;
+}
