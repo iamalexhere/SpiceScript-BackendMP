@@ -26,6 +26,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     signInBtn.addEventListener("click", () => {
         localStorage.setItem("userEmail", emailInput.value);
-        window.location.href = "catalog.html";
+        window.location.href = "/catalog";
     });
 });

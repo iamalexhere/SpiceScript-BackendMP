@@ -88,7 +88,7 @@ function renderCatalog() {
     cards.forEach(card => {
         card.addEventListener('click', () => {
             const recipeId = card.getAttribute('data-recipe-id');
-            window.location.href = `details.html?id=${recipeId}`;
+            window.location.href = `/details?id=${recipeId}`;
         });
     });
 }

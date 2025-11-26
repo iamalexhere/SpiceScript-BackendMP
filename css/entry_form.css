@@ -1,4 +1,10 @@
 body {
+    background-image:
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.4)),
+        url('../images/hero-image.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     height: 100vh;
     width: 100vw;
     padding: 0;
@@ -13,10 +19,14 @@ body {
 }
 
 .form-container {
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 20px;
     width: 40vw;
     padding: 30px;
-    height: 80vh;
+    min-height: 80vh;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .form-header {
@@ -28,7 +38,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto;
-    grid-template-areas: 
+    grid-template-areas:
         "label input"
         "label input";
 }
@@ -55,7 +65,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto;
-    grid-template-areas: 
+    grid-template-areas:
         "label input"
         "label input";
 }

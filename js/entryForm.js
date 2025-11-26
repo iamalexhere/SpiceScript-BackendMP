@@ -29,6 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // In a real app, you would save the recipe data here
         // For now, just redirect to catalog
         alert('Recipe created successfully!');
-        window.location.href = 'catalog.html';
+        window.location.href = '/catalog';
     });
 });
