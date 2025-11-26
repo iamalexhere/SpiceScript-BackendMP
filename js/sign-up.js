@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
-    const tosCheckbox = document.getElementById("tos");  
+    const tosCheckbox = document.getElementById("tos");
     const signUpBtn = document.getElementById("signUpBtn");
 
     const isValidEmail = (email) => {
@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const checkFormValidity = () => {
         const email = emailInput.value;
         const password = passwordInput.value;
-        const isTosChecked = tosCheckbox.checked; 
+        const isTosChecked = tosCheckbox.checked;
 
         if (!password || !isValidEmail(email) || !isTosChecked) {
             signUpBtn.classList.add("disabled-btn");
@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
     tosCheckbox.addEventListener("change", checkFormValidity); // Listener untuk checkbox
 
     signUpBtn.addEventListener("click", () => {
-        // alert("Account Created! Redirecting to home");
-            window.location.href = "../html/sign-in.html";
+        localStorage.setItem("userEmail", emailInput.value);
+        window.location.href = "/catalog";
     });
 });
