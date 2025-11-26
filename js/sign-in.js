@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     passwordInput.addEventListener("input", checkFormValidity);
 
     signInBtn.addEventListener("click", () => {
-        // localStorage.setItem("profile", emailInput.value);
-        window.location.href = "../html/sign-in.html";
+        localStorage.setItem("userEmail", emailInput.value);
+        window.location.href = "catalog.html";
     });
 });

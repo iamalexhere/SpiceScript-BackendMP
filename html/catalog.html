@@ -1,17 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Catalog</title>
     <link rel="stylesheet" href="../css/catalog.css">
     <script defer src="../js/catalog.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=search" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=search" />
 </head>
+
 <body>
 
     <div class="navbar">
-        <img class="catalog-logo" src="../icons/SpiceScript-Logo-Fixed.png" alt="SpiceScript-Logo">
+        <img class="catalog-logo" src="../icons/SpiceScript-Logo-Fixed.png" alt="SpiceScript-Logo"
+            style="cursor: pointer;" onclick="window.location.href='catalog.html'">
+        <div class="nav-buttons" style="display: flex; gap: 15px; align-items: center;">
+            <button id="createRecipeBtn" class="nav-btn"
+                style="display: none; padding: 8px 16px; background: #ff3b00; color: white; border: none; border-radius: 5px; cursor: pointer;"
+                onclick="window.location.href='entry_form.html'">Create Recipe</button>
+            <button id="signInBtn" class="nav-btn"
+                style="padding: 8px 16px; background: #ff3b00; color: white; border: none; border-radius: 5px; cursor: pointer;"
+                onclick="window.location.href='sign-in.html'">Sign In</button>
+            <button id="signOutBtn" class="nav-btn"
+                style="display: none; padding: 8px 16px; background: #ff3b00; color: white; border: none; border-radius: 5px; cursor: pointer;">Sign
+                Out</button>
+        </div>
     </div>
 
     <div class="hero-banner">
@@ -34,4 +49,5 @@
         </div>
     </div>
 </body>
+
 </html>

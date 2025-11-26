@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/entry_form.css">
+    <link rel="stylesheet" href="../css/entry_form.css">
     <title>Entry Form</title>
-    <script src="/js/entryForm.js" defer></script>
+    <script src="../js/entryForm.js" defer></script>
 </head>
+
 <body>
+    <div class="navbar"
+        style="display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <img src="../icons/SpiceScript-Logo-Fixed.png" alt="SpiceScript Logo"
+            style="max-width: 150px; height: auto; cursor: pointer;" onclick="window.location.href='catalog.html'">
+        <button
+            style="padding: 8px 16px; background: #ff3b00; color: white; border: none; border-radius: 5px; cursor: pointer;"
+            onclick="window.location.href='catalog.html'">← Back to Catalog</button>
+    </div>
     <div class="wrapper">
         <div class="form-container">
             <div class="form-header">
@@ -30,7 +40,7 @@
                         <label id="drop-area">
                             <input id="input-file" type="file" accept="image/*" hidden>
                             <div id="img-view">
-                                <img src="/icons/upload_icon_transparent.png" />
+                                <img src="../icons/upload_icon_transparent.png" />
                                 <p>Drag and drop or click here to <br>upload image</p>
                             </div>
                         </label>
@@ -53,4 +63,5 @@
         </div>
     </div>
 </body>
+
 </html>
