@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="../css/sign-up.css">
+</head>
+<body>
+    <div class="user-sign-up-page">
+        <div class="main-container">
+            <h1 class="page-title">Sign Up</h1>
+
+            <div class="title-underline"></div>
+
+            <div class="input-item">
+                <input type="email" id="email" placeholder="Email Address" autocomplete="email">
+            </div>
+
+            <div class="input-item">
+                <input type="password" id="password" placeholder="Password">
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" id="tos">
+                <label for="tos">
+                    i agree to the <a href="#" class="Link-text">Terms of Services</a>
+                </label>
+            </div>
+
+            <button id="signUpBtn" class="btn disabled-btn" disabled>
+                CREATE ACCOUNT
+            </button>
+
+            <span class="sign-in-wrapper">
+                Already have an account? 
+                <a href="sign-in.html" class="link-text sign-in-link">
+                    Sign in
+                </a>
+            </span>
+        </div>
+    </div>
+
+    <script src="../js/sign-up.js"></script>
+</body>
+</html>
