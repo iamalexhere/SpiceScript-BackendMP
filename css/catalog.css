@@ -1,3 +1,8 @@
+:root {
+    --primary-orange: #ff3b00;
+    --secondary-orange: #cc2f00;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -39,7 +44,7 @@
 }
 
 .search-button {
-    background-color: #ff3b00;
+    background-color: var(--primary-orange);
     color: white;
     border: none;
     padding: 0 20px;
@@ -48,6 +53,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.search-button:hover {
+    background-color: var(--secondary-orange);
 }
 
 .search-form {

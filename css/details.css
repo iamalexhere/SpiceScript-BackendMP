@@ -1,3 +1,8 @@
+:root {
+    --primary-orange: #ff3b00;
+    --secondary-orange: #cc2f00;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -224,7 +229,7 @@ body {
 }
 
 .EditButton-container button {
-    background: #FF5E00;
+    background: var(--primary-orange);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -237,7 +242,7 @@ body {
 }
 
 .EditButton-container button:hover {
-    background: #d95000;
+    background: var(--secondary-orange);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     transform: translateY(-1px);
 }
