@@ -39,8 +39,24 @@ const RECIPES_FILE = config.dataFiles.recipes;
  * - Check file exists, read, parse JSON
  */
 function loadRecipes() {
-    // TODO: Implement
-    throw new Error('loadRecipes() not implemented yet');
+    try {
+        // Cek apakah file recipes json ada
+        // fs.existsSync digunakan untuk memeriksa secara sinkronus apakah file path ada
+        if (!fs.existsSync(RECIPES_FILE)) {
+            return [];
+        }
+        
+        // fs.readFileSync digunakan untuk membaca isi file secara sinkronus
+        const content = fs.readFileSync(RECIPES_FILE, 'utf-8');
+        
+        // Parse json ke js object
+        const recipes = JSON.parse(content);
+
+        return recipes;
+    } catch (error) {
+        console.log('Error loading recipes:', error);
+        return [];
+    }
 }
 
 /**
@@ -71,8 +87,7 @@ function saveRecipes(recipes) {
  * - Return semua recipes (tidak perlu filter password seperti User)
  */
 function findAll() {
-    // TODO: Implement
-    throw new Error('findAll() not implemented yet');
+   return loadRecipes();
 }
 
 /**

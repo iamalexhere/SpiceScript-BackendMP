@@ -28,15 +28,23 @@ const { validateRecipe } = require('../utils/validation');
  * 2. Send response 200 dengan recipes data dan count
  */
 async function getAllRecipes(req, res) {
-    // TODO: Implement
-    res.writeHead(501, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-        success: false,
-        error: {
-            message: 'getAllRecipes() not implemented yet',
-            code: 'NOT_IMPLEMENTED'
+    try {
+        const recipes = Recipe.findAll();
+
+        const responseData = {
+            success: true,
+            data: {
+                recipes: recipes
+            }
         }
-    }));
+
+        res.writeHead(200, {'Content-Type': 'application/json'});
+
+        res.end(JSON.stringify(responseData));
+
+    } catch (error) {
+        console.log('Error finding all recipes:', error);
+    }
 }
 
 /**
