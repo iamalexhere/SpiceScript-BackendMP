@@ -1,5 +1,5 @@
 /**
- * Authentication Controller - TODO: IMPLEMENT
+ * Authentication Controller
  *
  * Controller untuk handle authentication operations:
  * - Sign Up (Register user baru)
@@ -15,8 +15,6 @@ const { serializeCookie, clearCookie } = require('../utils/cookies')
 const config = require('../config/config')
 
 /**
- * Implement signUp()
- *
  * Sign Up - Register user baru
  *
  * POST /api/auth/signup
@@ -58,10 +56,14 @@ async function signUp(req, res) {
         const sessionId = Session.create(newUser.id)
 
         // Serialize cookie dengan serializeCookie()
+        const cookieOptions = {
+            ...config.cookie,
+            maxAge: config.session.maxAge,
+        }
         const cookie = serializeCookie(
             config.session.cookieName,
             sessionId,
-            config.session.maxAge
+            cookieOptions
         )
 
         // Send response 201 dengan Set-Cookie header dan user data
@@ -91,8 +93,6 @@ async function signUp(req, res) {
 }
 
 /**
- * Implement signIn()
- *
  * Sign In - Login user
  *
  * POST /api/auth/signin
@@ -138,10 +138,14 @@ async function signIn(req, res) {
         const sessionId = Session.create(user.id)
 
         // Serialize cookie
+        const cookieOptions = {
+            ...config.cookie,
+            maxAge: config.session.maxAge,
+        }
         const cookie = serializeCookie(
             config.session.cookieName,
             sessionId,
-            config.session.maxAge
+            cookieOptions
         )
 
         // Send response dengan Set-Cookie header
@@ -170,8 +174,6 @@ async function signIn(req, res) {
 }
 
 /**
- * Implement signOut()
- *
  * Sign Out - Logout user
  *
  * POST /api/auth/signout
@@ -218,8 +220,6 @@ async function signOut(req, res) {
 }
 
 /**
- * Implement getCurrentUser()
- *
  * Get Current User - Get authenticated user info
  *
  * GET /api/auth/me

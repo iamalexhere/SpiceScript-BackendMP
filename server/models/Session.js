@@ -1,5 +1,5 @@
 /**
- * Session Model - IMPLEMENT
+ * Session Model
  *
  * Model untuk mengelola user sessions:
  * - Create session baru ketika user login
@@ -28,8 +28,6 @@ const SESSIONS_FILE = config.dataFiles.sessions
 let sessions = []
 
 /**
- * Implement load()
- *
  * Load sessions dari file JSON
  * Dipanggil saat server startup
  *
@@ -61,8 +59,6 @@ function load() {
 }
 
 /**
- * Implement save()
- *
  * Save sessions ke file JSON
  *
  * @param {Array} sessionsToSave - Array of session objects (optional, default ke in-memory sessions)
@@ -78,8 +74,6 @@ function save(sessionsToSave = sessions) {
 }
 
 /**
- * Implement create()
- *
  * Create session baru
  *
  * @param {number} userId - User ID
@@ -109,8 +103,6 @@ function create(userId) {
 }
 
 /**
- * Implement findById()
- *
  * Find session by ID
  *
  * @param {string} sessionId - Session ID
@@ -136,8 +128,6 @@ function findById(sessionId) {
 }
 
 /**
- * Implement destroy()
- *
  * Destroy/delete session
  *
  * @param {string} sessionId - Session ID yang akan dihapus
@@ -160,8 +150,6 @@ function destroy(sessionId) {
 }
 
 /**
- * Implement cleanup()
- *
  * Cleanup expired sessions
  *
  * @returns {number} Jumlah sessions yang dihapus
@@ -188,8 +176,6 @@ function cleanup() {
 }
 
 /**
- * Implement getAll()
- *
  * Get all active sessions
  *
  * @returns {Array} Array of active sessions
@@ -202,8 +188,6 @@ function getAll() {
 }
 
 /**
- * Implement destroyByUserId()
- *
  * Destroy all sessions untuk user tertentu
  *
  * @param {number} userId - User ID

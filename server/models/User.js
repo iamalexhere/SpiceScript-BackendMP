@@ -1,5 +1,5 @@
 /**
- * User Model : IMPLEMENT
+ * User Model
  *
  * Model untuk mengelola data user:
  * - CRUD operations untuk users
@@ -26,8 +26,6 @@ const { hashPassword, verifyPassword } = require('../utils/crypto')
 const USERS_FILE = config.dataFiles.users
 
 /**
- * Implement loadUsers()
- *
  * Load users dari file JSON
  *
  * @returns {Array} Array of user objects
@@ -186,21 +184,24 @@ function create(userData) {
     //Generate ID baru: Math.max(...users.map(u => u.id)) + 1
     const newId = Math.max(...users.map((u) => u.id)) + 1
     //Hash password dengan hashPassword(userData.password)
-    const hashPassword = hashPassword(userData.password)
+    const hashedPassword = hashPassword(userData.password)
 
     //Create user object dengan timestamps (new Date().toISOString())
     const newUser = {
         id: newId,
         username: userData.username,
         email: userData.email,
-        password: hashPassword,
+        password: hashedPassword,
         createdAt: new Date().toISOString(),
     }
 
     //Add ke array users dan save
     users.push(newUser)
     saveUsers(users)
-    return newUser
+
+    // Return user tanpa password
+    const { password, ...userWithoutPassword } = newUser
+    return userWithoutPassword
 }
 
 /**
