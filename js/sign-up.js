@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Handle errors
                 const errorMessage =
-                    data.error?.message || 'Sign up failed. Please try again.'
+                    data.message || 'Sign up failed. Please try again.'
                 alert(errorMessage)
 
                 // Re-enable button

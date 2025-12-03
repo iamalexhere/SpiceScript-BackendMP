@@ -8,9 +8,9 @@
  * - Update recipe (author only)
  * - Delete recipe (author only)
  */
-
 const Recipe = require('../models/Recipe');
 const { validateRecipe } = require('../utils/validation');
+
 
 /**
  * TODO: Implement getAllRecipes()
@@ -97,15 +97,32 @@ async function getRecipeById(req, res) {
  * 6. Send response 201 dengan recipe data
  */
 async function createRecipe(req, res) {
-    // TODO: Implement
-    res.writeHead(501, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-        success: false,
-        error: {
-            message: 'createRecipe() not implemented yet',
-            code: 'NOT_IMPLEMENTED'
-        }
-    }));
+    const recipeData = {
+        recipeName: req.body.recipeName,
+        description: req.body.description,
+        ingredients: req.body.ingredients,
+        directions: req.body.directions,
+    };
+
+    if (!validateRecipe(recipeData)) {
+        res.statusCode = 400;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ error: 'Missing required fields' }));
+        return;
+    }
+
+    const user = req.user;
+    if (!user || !user.id || !user.username) {
+        res.statusCode = 401;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ error: 'Unauthorized' }));
+    }
+
+    const newRecipe = Recipe.create(recipeData, user.id, user.username);
+
+    res.statusCode = 201;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(newRecipe));
 }
 
 /**
