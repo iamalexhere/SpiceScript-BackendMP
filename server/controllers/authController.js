@@ -30,7 +30,7 @@ async function signUp(req, res) {
         const { username, email, password, confirmPassword } = req.body
 
         // Validate dengan validateSignUp()
-        const validationErrors = validateSignUp({
+        const validationResult = validateSignUp({
             username,
             email,
             password,
@@ -38,13 +38,13 @@ async function signUp(req, res) {
         })
 
         // Jika validation gagal, return 400 dengan details
-        if (validationErrors) {
+        if (!validationResult.valid) {
             res.writeHead(400, { 'Content-Type': 'application/json' })
             return res.end(
                 JSON.stringify({
                     success: false,
                     message: 'Validation failed',
-                    errors: validationErrors,
+                    errors: validationResult.errors,
                 })
             )
         }
@@ -107,14 +107,14 @@ async function signIn(req, res) {
         const { email, password } = req.body
 
         // Validate dengan validateSignIn()
-        const validationErrors = validateSignIn({ email, password })
-        if (validationErrors) {
+        const validationResult = validateSignIn({ email, password })
+        if (!validationResult.valid) {
             res.writeHead(400, { 'Content-Type': 'application/json' })
             return res.end(
                 JSON.stringify({
                     success: false,
                     message: 'Validation failed',
-                    errors: validationErrors,
+                    errors: validationResult.errors,
                 })
             )
         }
