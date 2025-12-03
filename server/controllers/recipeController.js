@@ -8,9 +8,9 @@
  * - Update recipe (author only)
  * - Delete recipe (author only)
  */
+
 const Recipe = require('../models/Recipe');
 const { validateRecipe } = require('../utils/validation');
-
 
 /**
  * TODO: Implement getAllRecipes()
@@ -28,23 +28,38 @@ const { validateRecipe } = require('../utils/validation');
  * 2. Send response 200 dengan recipes data dan count
  */
 async function getAllRecipes(req, res) {
-    try {
-        const recipes = Recipe.findAll();
+    // TODO: Implement
 
-        const responseData = {
+    // res.writeHead(501, { 'Content-Type': 'application/json' });
+    // res.end(JSON.stringify({
+    //     success: false,
+    //     error: {
+    //         message: 'getAllRecipes() not implemented yet',
+    //         code: 'NOT_IMPLEMENTED'
+    //     }
+    // }));
+
+    try {
+        const DataRecipe = Recipe.findAll();
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
             success: true,
             data: {
-                recipes: recipes
+                DataRecipe,
+                count: DataRecipe.length
             }
-        }
-
-        res.writeHead(200, {'Content-Type': 'application/json'});
-
-        res.end(JSON.stringify(responseData));
-
+        }));
     } catch (error) {
-        console.log('Error finding all recipes:', error);
+        console.error('Error in getAllRecipes:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: false,
+            message: 'Failed to getAll recipes',
+            error: error.message
+        }));
     }
+    
 }
 
 /**
@@ -66,14 +81,61 @@ async function getAllRecipes(req, res) {
  */
 async function getRecipeById(req, res) {
     // TODO: Implement
-    res.writeHead(501, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-        success: false,
-        error: {
-            message: 'getRecipeById() not implemented yet',
-            code: 'NOT_IMPLEMENTED'
+    
+    // res.writeHead(501, { 'Content-Type': 'application/json' });
+    // res.end(JSON.stringify({
+    //     success: false,
+    //     error: {
+    //         message: 'getRecipeById() not implemented yet',
+    //         code: 'NOT_IMPLEMENTED'
+    //     }
+    // }));
+
+        try {
+        const recipeId = req.params && req.params.id;
+
+        //jika server menerima request tanpa id / kosong
+        if (!recipeId) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                message: 'Recipe ID tidak diterima'
+            }));
+            return;
         }
-    }));
+
+        //ambil recip berdasarkan id dari models Recipe.js
+        const recipe = Recipe.findById(recipeId);
+
+        //jika server menerima request id tapi id nya tidak ada di data recipe
+        if (!recipe) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                message: 'Recipe tidak ditemukan'
+            }));
+            return;
+        }
+
+        //kirim resep ke user
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: true,
+            data: {
+                recipe
+            }
+        }));
+
+
+    } catch (error) {
+        console.error('Error in getRecipeById:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: false,
+            message: 'Error ketika mengambil resep berdasarkan ID',
+            error: error.message
+        }));
+    }
 }
 
 /**
@@ -97,32 +159,15 @@ async function getRecipeById(req, res) {
  * 6. Send response 201 dengan recipe data
  */
 async function createRecipe(req, res) {
-    const recipeData = {
-        recipeName: req.body.recipeName,
-        description: req.body.description,
-        ingredients: req.body.ingredients,
-        directions: req.body.directions,
-    };
-
-    if (!validateRecipe(recipeData)) {
-        res.statusCode = 400;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ error: 'Missing required fields' }));
-        return;
-    }
-
-    const user = req.user;
-    if (!user || !user.id || !user.username) {
-        res.statusCode = 401;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ error: 'Unauthorized' }));
-    }
-
-    const newRecipe = Recipe.create(recipeData, user.id, user.username);
-
-    res.statusCode = 201;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(newRecipe));
+    // TODO: Implement
+    res.writeHead(501, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+        success: false,
+        error: {
+            message: 'createRecipe() not implemented yet',
+            code: 'NOT_IMPLEMENTED'
+        }
+    }));
 }
 
 /**
