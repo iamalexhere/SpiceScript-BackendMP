@@ -23,6 +23,7 @@
 
 const fs = require('fs');
 const config = require('../config/config');
+const recipes = [];
 
 // Path ke file recipes.json
 const RECIPES_FILE = config.dataFiles.recipes;
@@ -129,8 +130,29 @@ function findByAuthor(authorId) {
  * - Add ke recipes array dan save
  */
 function create(recipeData, authorId, authorName) {
-    // TODO: Implement
-    throw new Error('create() not implemented yet');
+    const data = fs.readFileSync(RECIPES_FILE, 'utf8');
+    const recipes = JSON.parse(data);
+
+    const maxId = Math.max(...recipes.map(r => r.id));
+    const newId = maxId + 1;
+
+    const newRecipe = {
+        id: newId,
+        recipeName: recipeData.recipeName,
+        description: recipeData.description,
+        ingredients: recipeData.ingredients,
+        directions: recipeData.directions,
+        imagePath: "../images/default-recipe.jpg",
+        authorId: authorId,
+        authorName: authorName,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
+
+    recipes.push(newRecipe);
+    fs.writeFileSync(RECIPES_FILE, JSON.stringify(recipes, null, 2), 'utf8');
+
+    return newRecipe;
 }
 
 /**
