@@ -52,11 +52,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (response.ok && data.success) {
                 // Success! Cookie akan di-set otomatis oleh browser
-                alert(`Welcome back, ${data.data.user.username}!`);
+                alert(`Welcome back, ${data.user.username}!`);
                 window.location.href = '/catalog';
             } else {
                 // Handle errors
-                const errorMessage = data.error?.message || 'Sign in failed. Please check your credentials.';
+                const errorMessage = data.message || 'Sign in failed. Please check your credentials.';
                 alert(errorMessage);
 
                 // Re-enable button
