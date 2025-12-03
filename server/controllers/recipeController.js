@@ -28,23 +28,37 @@ const { validateRecipe } = require('../utils/validation');
  * 2. Send response 200 dengan recipes data dan count
  */
 async function getAllRecipes(req, res) {
-    try {
-        const recipes = Recipe.findAll();
-
-        const responseData = {
-            success: true,
-            data: {
-                recipes: recipes
-            }
+    // TODO: Implement
+    
+        // res.writeHead(501, { 'Content-Type': 'application/json' });
+        // res.end(JSON.stringify({
+        //     success: false,
+        //     error: {
+        //         message: 'getAllRecipes() not implemented yet',
+        //         code: 'NOT_IMPLEMENTED'
+        //     }
+        // }));
+    
+        try {
+            const DataRecipe = Recipe.findAll();
+    
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                data: {
+                    DataRecipe,
+                    count: DataRecipe.length
+                }
+            }));
+        } catch (error) {
+            console.error('Error in getAllRecipes:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                message: 'Failed to getAll recipes',
+                error: error.message
+            }));
         }
-
-        res.writeHead(200, {'Content-Type': 'application/json'});
-
-        res.end(JSON.stringify(responseData));
-
-    } catch (error) {
-        console.log('Error finding all recipes:', error);
-    }
 }
 
 /**
@@ -66,14 +80,61 @@ async function getAllRecipes(req, res) {
  */
 async function getRecipeById(req, res) {
     // TODO: Implement
-    res.writeHead(501, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-        success: false,
-        error: {
-            message: 'getRecipeById() not implemented yet',
-            code: 'NOT_IMPLEMENTED'
+        
+        // res.writeHead(501, { 'Content-Type': 'application/json' });
+        // res.end(JSON.stringify({
+        //     success: false,
+        //     error: {
+        //         message: 'getRecipeById() not implemented yet',
+        //         code: 'NOT_IMPLEMENTED'
+        //     }
+        // }));
+    
+            try {
+            const recipeId = req.params && req.params.id;
+    
+            //jika server menerima request tanpa id / kosong
+            if (!recipeId) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: false,
+                    message: 'Recipe ID tidak diterima'
+                }));
+                return;
+            }
+    
+            //ambil recip berdasarkan id dari models Recipe.js
+            const recipe = Recipe.findById(recipeId);
+    
+            //jika server menerima request id tapi id nya tidak ada di data recipe
+            if (!recipe) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: false,
+                    message: 'Recipe tidak ditemukan'
+                }));
+                return;
+            }
+    
+            //kirim resep ke user
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: true,
+                data: {
+                    recipe
+                }
+            }));
+    
+    
+        } catch (error) {
+            console.error('Error in getRecipeById:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                message: 'Error ketika mengambil resep berdasarkan ID',
+                error: error.message
+            }));
         }
-    }));
 }
 
 /**
