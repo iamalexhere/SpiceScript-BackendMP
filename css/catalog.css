@@ -33,6 +33,7 @@
     display: flex;
     width: 100%;
     margin-bottom: 30px;
+    flex-direction: column;
 }
 
 .search-input {
@@ -43,6 +44,9 @@
     border-radius: 4px;
     outline: none;
     transition: border-color 0.3s;
+    margin-left: 2rem;
+    margin-right: 2rem;
+    margin-top: 1rem;
 }
 
 .search-button {
@@ -77,7 +81,7 @@ body {
 
 #catalog {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 2rem;
     /* margin: 0 auto; */
     background-color: white;
@@ -143,7 +147,7 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 
     width: 90%;
-    max-width: 70%;
+    max-width: 75%;
     margin: 0 auto 50px;
 
     margin-top: -150px;

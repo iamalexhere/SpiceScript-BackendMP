@@ -61,11 +61,18 @@ async function checkAuth() {
 // Render recipe cards
 function renderCatalog(recipes) {
     const catalogContainer = document.getElementById('catalog');
+    const searchContainer = document.querySelector('.search-message');
 
     if (!recipes || recipes.length === 0) {
-        catalogContainer.innerHTML = '<p style="text-align: center; padding: 40px;">No recipes found. Be the first to add one!</p>';
+        searchContainer.innerHTML = `
+            <h2 style="text-align: center; padding-top: 2em;">No recipes found!</h2>
+            <p style="text-align: center;">Be the first to add one!</p>
+        `;
+        catalogContainer.innerHTML = '';
         return;
     }
+
+    searchContainer.innerHTML = ''; // reset search message if found
 
     const htmlCard = recipes.map(recipe => `
         <div class="card" data-recipe-id="${recipe.id}" style="cursor: pointer;">
@@ -143,6 +150,16 @@ async function loadPage() {
     // Fetch and render recipes
     const recipes = await fetchRecipes();
     renderCatalog(recipes);
+
+    // Text input object in the HTML
+    const input = document.querySelector(".search-input");
+
+    // Attach event listener so whenever the input changes, it filters the recipes
+    input.addEventListener('input', (e) => {
+        const keywords = e.target.value;
+        const filteredRecipes = recipes.filter(recipe => recipe.recipeName.toLowerCase().includes(keywords));
+        renderCatalog(filteredRecipes);
+    });
 }
 
 // Set up event listeners
