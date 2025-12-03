@@ -14,18 +14,11 @@
 <body>
 
     <div class="navbar">
-        <img class="catalog-logo" src="../icons/SpiceScript-Logo-Fixed.png" alt="SpiceScript-Logo"
-            style="cursor: pointer;" onclick="window.location.href='/catalog'">
+        <img class="catalog-logo" src="../icons/SpiceScript-Logo-Fixed.png" alt="SpiceScript-Logo" onclick="window.location.href='/catalog'">
         <div class="nav-buttons" style="display: flex; gap: 15px; align-items: center;">
-            <button id="createRecipeBtn" class="nav-btn"
-                style="display: none; padding: 8px 16px; background: #ff3b00; color: white; border: none; border-radius: 5px; cursor: pointer;"
-                onclick="window.location.href='/entry_form'">Create Recipe</button>
-            <button id="signInBtn" class="nav-btn"
-                style="padding: 8px 16px; background: #ff3b00; color: white; border: none; border-radius: 5px; cursor: pointer;"
-                onclick="window.location.href='/sign-in'">Sign In</button>
-            <button id="signOutBtn" class="nav-btn"
-                style="display: none; padding: 8px 16px; background: #ff3b00; color: white; border: none; border-radius: 5px; cursor: pointer;">Sign
-                Out</button>
+            <button id="createRecipeBtn" class="nav-btn" onclick="window.location.href='/entry_form'">Create Recipe</button>
+            <button id="signInBtn" class="nav-btn" onclick="window.location.href='/sign-in'">Sign In</button>
+            <button id="signOutBtn" class="nav-btn">Sign Out</button>
         </div>
     </div>
 
@@ -36,12 +29,11 @@
     <div class="main-content-container">
 
         <div class="search-container">
-            <form class="search-form" action="">
-                <input class="search-input" type="text" placeholder="Search Recipes. . ." name="search">
-                <button class="search-button" type="submit">
-                    <span class="material-symbols-outlined">search</span>
-                </button>
-            </form>
+            <!-- search input -->
+            <input class="search-input" type="text" placeholder="Search for recipes..." name="search">
+
+            <!-- search message if no recipes found -->
+            <div class="search-message"></div>
         </div>
 
         <div id="catalog">

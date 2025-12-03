@@ -229,29 +229,24 @@ async function signOut(req, res) {
  * @param {Object} res - Response object
  */
 async function getCurrentUser(req, res) {
-    try {
-        // Get user dari req.user (sudah di-set oleh auth middleware)
-        const user = req.user
 
-        // Send user data dengan status 200
-        res.writeHead(200, { 'Content-Type': 'application/json' })
-        res.end(
-            JSON.stringify({
+    try {
+        const user = req.user;
+
+        const responseData = {
                 success: true,
-                user: user,
-            })
-        )
+                data: {
+                    user: user
+                }
+            }
+
+        res.writeHead(200, {'Content-Type': 'application/json'});
+
+        res.end(JSON.stringify(responseData));
     } catch (error) {
-        console.error(error.message)
-        res.writeHead(500, { 'Content-Type': 'application/json' })
-        res.end(
-            JSON.stringify({
-                success: false,
-                message: 'Internal Server Error',
-                code: 'SERVER_ERROR',
-            })
-        )
+        console.log('Error getting current user: ', error);
     }
+
 }
 
 module.exports = {
