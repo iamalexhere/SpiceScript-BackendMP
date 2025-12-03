@@ -24,17 +24,17 @@
             <div class="form-header">
                 <h2>Upload A Recipe</h2>
             </div>
-            <form>
+            <form action="/api/recipes" method="POST">
                 <!-- Recipe Name -->
                 <div class="form-group">
                     <label for="recipe-name">Recipe Name *</label>
-                    <input type="text" id="recipe-name" class="form-input" placeholder="e.g., Semangka Bakar" required>
+                    <input name="recipe-name" type="text" id="recipe-name" class="form-input" placeholder="e.g., Semangka Bakar" required>
                 </div>
 
                 <!-- Description -->
                 <div class="form-group">
                     <label for="description">Description *</label>
-                    <textarea id="description" class="form-textarea" rows="3"
+                    <textarea name="description" id="description" class="form-textarea" rows="3"
                         placeholder="Brief description of your recipe..." required></textarea>
                 </div>
 
@@ -53,7 +53,7 @@
                 <!-- Ingredients -->
                 <div class="form-group">
                     <label for="ingredients">Ingredients *</label>
-                    <textarea id="ingredients" class="form-textarea" rows="5"
+                    <textarea name="ingredients" id="ingredients" class="form-textarea" rows="5"
                         placeholder="1 cup of paitence&#10;2 cups of love&#10;1/2 cup of trust&#10;..."
                         required></textarea>
                     <small class="form-hint">Add each ingredient on a new line</small>
@@ -62,7 +62,7 @@
                 <!-- Directions -->
                 <div class="form-group">
                     <label for="directions">Directions *</label>
-                    <textarea id="directions" class="form-textarea" rows="6"
+                    <textarea name="directions" id="directions" class="form-textarea" rows="6"
                         placeholder="1. Pray to the gods&#10;2. Trust the process...&#10;3. ..." required></textarea>
                     <small class="form-hint">Write step-by-step instructions</small>
                 </div>
