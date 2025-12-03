@@ -1,82 +1,79 @@
+/**
+ * Catalog - Frontend Integration with Backend API
+ * 
+ * Connects to:
+ * - GET /api/recipes - Fetch all recipes
+ * - GET /api/auth/me - Check authentication status
+ * - POST /api/auth/signout - Logout
+ */
 
-// Mock Data
-const recipes = [
-    {
-        id: 1,
-        title: 'Batagor Goreng',
-        img: 'https://placehold.co/600x400',
-        description: 'Batagor goreng khas jabar barat',
-        ingredients: 'Baso, tahu, goreng',
-        steps: 'Goreng',
-    },
-    {
-        id: 2,
-        title: 'Cireng Goreng',
-        img: 'https://placehold.co/600x400',
-        description: 'Cireng goreng khas bojongsoang',
-        ingredients: 'Aci',
-        steps: 'Goreng',
-    },
-    {
-        id: 3,
-        title: 'Naspad Padang',
-        img: 'https://placehold.co/600x400',
-        description: 'Nasi Padang khas padang pariaman',
-        ingredients: 'Nasi',
-        steps: 'Padang',
-    },
-    {
-        id: 4,
-        title: 'Naskun Kuning Warning',
-        img: 'https://placehold.co/600x400',
-        description: 'Nasi Kuning khas warning',
-        ingredients: 'Nasi',
-        steps: 'Kuning',
-    },
-    {
-        id: 5,
-        title: 'Nasgor Goreng',
-        img: 'https://placehold.co/600x400',
-        description: 'Nasi goreng khas mojokerto',
-        ingredients: 'Nasi',
-        steps: 'Goreng',
-    },
-    {
-        id: 5,
-        title: 'Nasgor Goreng',
-        img: 'https://placehold.co/600x400',
-        description: 'Nasi goreng khas mojokerto',
-        ingredients: 'Nasi',
-        steps: 'Goreng',
-    },
-    {
-        id: 3,
-        title: 'Naspad Padang',
-        img: 'https://placehold.co/600x400',
-        description: 'Nasi Padang khas padang pariaman',
-        ingredients: 'Nasi',
-        steps: 'Padang',
-    },
-    {
-        id: 1,
-        title: 'Batagor Goreng',
-        img: 'https://placehold.co/600x400',
-        description: 'Batagor goreng khas jabar barat',
-        ingredients: 'Baso, tahu, goreng',
-        steps: 'Goreng',
-    },
+let currentUser = null;
 
-]
+// Fetch recipes dari backend
+async function fetchRecipes() {
+    try {
+        const response = await fetch('/api/recipes', {
+            credentials: 'include'
+        });
 
-function renderCatalog() {
+        if (!response.ok) {
+            throw new Error('Failed to fetch recipes');
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            return data.data.recipes || [];
+        }
+
+        return [];
+    } catch (error) {
+        console.error('Error fetching recipes:', error);
+        alert('Failed to load recipes. Please refresh the page.');
+        return [];
+    }
+}
+
+// Check authentication status
+async function checkAuth() {
+    try {
+        const response = await fetch('/api/auth/me', {
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                currentUser = data.data.user;
+                return true;
+            }
+        }
+
+        currentUser = null;
+        return false;
+    } catch (error) {
+        console.error('Error checking auth:', error);
+        currentUser = null;
+        return false;
+    }
+}
+
+// Render recipe cards
+function renderCatalog(recipes) {
     const catalogContainer = document.getElementById('catalog');
+
+    if (!recipes || recipes.length === 0) {
+        catalogContainer.innerHTML = '<p style="text-align: center; padding: 40px;">No recipes found. Be the first to add one!</p>';
+        return;
+    }
 
     const htmlCard = recipes.map(recipe => `
         <div class="card" data-recipe-id="${recipe.id}" style="cursor: pointer;">
-            <img src="${recipe.img}" class="image-container">
+            <img src="${recipe.imagePath || '../images/default-recipe.jpg'}" class="image-container" alt="${recipe.recipeName}">
             <div class="card-inner-container">
-                <h4><b>${recipe.title}</b></h4>
+                <h4><b>${recipe.recipeName}</b></h4>
                 <p>${recipe.description}</p>
+                <small style="color: #888;">by ${recipe.authorName || 'Anonymous'}</small>
             </div>
         </div>
     `).join('');
@@ -93,14 +90,13 @@ function renderCatalog() {
     });
 }
 
-// Check user authentication state
+// Update nav buttons based on auth state
 function updateNavButtons() {
-    const userEmail = localStorage.getItem('userEmail');
     const signInBtn = document.getElementById('signInBtn');
     const signOutBtn = document.getElementById('signOutBtn');
     const createRecipeBtn = document.getElementById('createRecipeBtn');
 
-    if (userEmail) {
+    if (currentUser) {
         // User is logged in
         signInBtn.style.display = 'none';
         signOutBtn.style.display = 'block';
@@ -113,16 +109,49 @@ function updateNavButtons() {
     }
 }
 
-// Sign out functionality
+// Handle sign out
+async function handleSignOut() {
+    try {
+        const response = await fetch('/api/auth/signout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            currentUser = null;
+            updateNavButtons();
+            alert('Signed out successfully!');
+            // Optionally reload recipes
+            await loadPage();
+        } else {
+            alert('Sign out failed. Please try again.');
+        }
+    } catch (error) {
+        console.error('Sign out error:', error);
+        alert('Network error during sign out.');
+    }
+}
+
+// Initialize page
+async function loadPage() {
+    // Check authentication status
+    await checkAuth();
+
+    // Update nav buttons
+    updateNavButtons();
+
+    // Fetch and render recipes
+    const recipes = await fetchRecipes();
+    renderCatalog(recipes);
+}
+
+// Set up event listeners
 document.addEventListener('DOMContentLoaded', () => {
     const signOutBtn = document.getElementById('signOutBtn');
     if (signOutBtn) {
-        signOutBtn.addEventListener('click', () => {
-            localStorage.removeItem('userEmail');
-            updateNavButtons();
-        });
+        signOutBtn.addEventListener('click', handleSignOut);
     }
-});
 
-renderCatalog();
-updateNavButtons();
+    // Load page data
+    loadPage();
+});

@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "username": "johndoe",
+    "email": "john.doe@example.com",
+    "password": "af0e2ec4cba4456aef0b5af47fe0d046:25f56e4615ce040c7f14164e3da3029650a6a84249ac8f6c005141943b45aa5d04d01a73e2076c24573dc085c8bd098f3da8ec812b2982fa7464e3fdafd72c35",
+    "createdAt": "2024-01-15T10:30:00.000Z",
+    "updatedAt": "2024-01-15T10:30:00.000Z"
+  },
+  {
+    "id": 2,
+    "username": "janesmith",
+    "email": "jane.smith@example.com",
+    "password": "eabd201038e29a929b4f13f5ae7ac6b6:aa848b9c301087f05d023d208279d441f9d55a6c50e22b0bf36284cdb3b1576a81510c0f8315180d05a21a4e913ce16300231c747927f0c3b53f027d6f78e3fd",
+    "createdAt": "2024-01-20T14:20:00.000Z",
+    "updatedAt": "2024-01-20T14:20:00.000Z"
+  },
+  {
+    "id": 3,
+    "username": "petermartin",
+    "email": "peter.martin@example.com",
+    "password": "ce23b83c6fbe60f3b6691cba5ecd0b9a:f1be155ff81d20a7cd8a77601c3efcfa65e16a4fe72ecf5cb08dcca32b5cb3318421bcf70dbd8de6f2b84162937e7274cf3e9b3cb08018d927034520710464ec",
+    "createdAt": "2024-02-01T09:15:00.000Z",
+    "updatedAt": "2024-02-01T09:15:00.000Z"
+  }
+]
