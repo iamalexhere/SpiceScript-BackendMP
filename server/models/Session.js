@@ -1,13 +1,13 @@
 /**
- * Session Model - TODO: IMPLEMENT
- * 
+ * Session Model - IMPLEMENT
+ *
  * Model untuk mengelola user sessions:
  * - Create session baru ketika user login
  * - Find/validate session
  * - Delete session ketika user logout
  * - Cleanup expired sessions
  * - Persist sessions ke sessions.json
- * 
+ *
  * Session structure:
  * {
  *   sessionId: string,
@@ -17,22 +17,22 @@
  * }
  */
 
-const fs = require('fs');
-const config = require('../config/config');
-const { generateSessionId } = require('../utils/crypto');
+const fs = require('fs')
+const config = require('../config/config')
+const { generateSessionId } = require('../utils/crypto')
 
 // Path ke file sessions.json
-const SESSIONS_FILE = config.dataFiles.sessions;
+const SESSIONS_FILE = config.dataFiles.sessions
 
 // In-memory sessions storage
-let sessions = [];
+let sessions = []
 
 /**
- * TODO: Implement load()
- * 
+ * Implement load()
+ *
  * Load sessions dari file JSON
  * Dipanggil saat server startup
- * 
+ *
  * HINTS:
  * - Check file exists
  * - Read dan parse JSON
@@ -40,146 +40,198 @@ let sessions = [];
  * - Call cleanup() setelah load
  */
 function load() {
-    // TODO: Implement
-    throw new Error('load() not implemented yet');
+    //Check file exists
+    if (!fs.existsSync(SESSIONS_FILE)) {
+        sessions = []
+        return sessions
+    }
+
+    try {
+        //Read dan parse JSON
+        const content = fs.readFileSync(SESSIONS_FILE, 'utf-8')
+        sessions = JSON.parse(content)
+    } catch (error) {
+        console.error('gagal load sessions')
+        sessions = []
+    }
+    //Call cleanup() setelah load
+    cleanup()
+    //Set ke variable sessions (implicit by modifying global 'sessions' array)
+    return sessions
 }
 
 /**
- * TODO: Implement save()
- * 
+ * Implement save()
+ *
  * Save sessions ke file JSON
- * 
+ *
  * @param {Array} sessionsToSave - Array of session objects (optional, default ke in-memory sessions)
- * 
- * HINTS:
- * - Similar dengan saveUsers/saveRecipes
- * - Use sessionsToSave parameter atau default ke global sessions variable
  */
 function save(sessionsToSave = sessions) {
-    // TODO: Implement
-    throw new Error('save() not implemented yet');
+    //Use sessionsToSave parameter atau default ke global sessions variable
+    try {
+        const jsonString = JSON.stringify(sessionsToSave, null, 2)
+        fs.writeFileSync(SESSIONS_FILE, jsonString)
+    } catch (error) {
+        console.error('gagal save sessions')
+    }
 }
 
 /**
- * TODO: Implement create()
- * 
+ * Implement create()
+ *
  * Create session baru
- * 
+ *
  * @param {number} userId - User ID
  * @returns {string} Session ID
- * 
- * HINTS:
- * - Generate sessionId dengan generateSessionId()
- * - Calculate expiresAt: new Date(Date.now() + config.session.maxAge)
- * - Create session object dengan sessionId, userId, createdAt, expiresAt
- * - Push ke sessions array
- * - Call save()
- * - Return sessionId
  */
 function create(userId) {
-    // TODO: Implement
-    throw new Error('create() not implemented yet');
+    //Generate sessionId dengan generateSessionId()
+    const sessionId = generateSessionId()
+
+    //Calculate expiresAt: new Date(Date.now() + config.session.maxAge)
+    const expiresAt = new Date(Date.now() + config.session.maxAge)
+
+    //Create session object dengan sessionId, userId, createdAt, expiresAt
+    const newSession = {
+        sessionId: sessionId,
+        userId: userId,
+        createdAt: new Date().toISOString(),
+        expiresAt: expiresAt.toISOString(),
+    }
+
+    //Push ke sessions array
+    sessions.push(newSession)
+    //Call save()
+    save(sessions)
+    //Return sessionId
+    return sessionId
 }
 
 /**
- * TODO: Implement findById()
- * 
+ * Implement findById()
+ *
  * Find session by ID
- * 
+ *
  * @param {string} sessionId - Session ID
  * @returns {Object|null} Session object atau null jika tidak found/expired
- * 
- * HINTS:
- * - Find session dalam sessions array
- * - Check apakah expired: new Date(session.expiresAt) < new Date()
- * - Jika expired, call destroy(sessionId) dan return null
- * - Return session jika valid
  */
 function findById(sessionId) {
-    // TODO: Implement
-    throw new Error('findById() not implemented yet');
+    //Find session dalam sessions array
+    const session = sessions.find((s) => s.sessionId === sessionId)
+
+    if (!session) {
+        return null
+    }
+
+    //Check apakah expired: new Date(session.expiresAt) < new Date()
+    if (new Date(session.expiresAt) < new Date()) {
+        //Jika expired, call destroy(sessionId) dan return null
+        destroy(sessionId)
+        return null
+    }
+
+    //Return session jika valid
+    return session
 }
 
 /**
- * TODO: Implement destroy()
- * 
+ * Implement destroy()
+ *
  * Destroy/delete session
- * 
+ *
  * @param {string} sessionId - Session ID yang akan dihapus
  * @returns {boolean} true jika berhasil delete, false jika tidak found
- * 
- * HINTS:
- * - Store initial length
- * - Filter out session dengan sessionId tersebut
- * - Call save()
- * - Return true jika length berkurang, false jika tidak
  */
 function destroy(sessionId) {
-    // TODO: Implement
-    throw new Error('destroy() not implemented yet');
+    //Store initial length
+    const initialLength = sessions.length
+    //Filter out session dengan sessionId tersebut
+    sessions = sessions.filter((s) => s.sessionId !== sessionId)
+
+    //Call save()
+    if (sessions.length < initialLength) {
+        save()
+        //Return true jika length berkurang, false jika tidak
+        return true
+    }
+
+    return false
 }
 
 /**
- * TODO: Implement cleanup()
- * 
+ * Implement cleanup()
+ *
  * Cleanup expired sessions
- * 
+ *
  * @returns {number} Jumlah sessions yang dihapus
- * 
- * HINTS:
- * - Get current time: new Date()
- * - Filter sessions yang belum expired
- * - Count berapa yang dihapus
- * - Call save() jika ada yang dihapus
- * - Log ke console
  */
 function cleanup() {
-    // TODO: Implement
-    throw new Error('cleanup() not implemented yet');
+    //Get current time: new Date()
+    const initialLength = sessions.length
+    const now = new Date()
+    //Filter sessions yang belum expired
+    const activeSessions = sessions.filter((s) => new Date(s.expiresAt) > now)
+
+    //Count berapa yang dihapus
+    const removedCount = initialLength - activeSessions.length
+
+    if (removedCount > 0) {
+        sessions = activeSessions
+        //Call save() jika ada yang dihapus
+        save()
+        //Log ke console
+        console.log(`removed ${removedCount} expired sessions`)
+    }
+
+    return removedCount
 }
 
 /**
- * TODO: Implement getAll()
- * 
+ * Implement getAll()
+ *
  * Get all active sessions
- * 
+ *
  * @returns {Array} Array of active sessions
- * 
- * HINTS:
- * - Call cleanup() dulu
- * - Return sessions array
  */
 function getAll() {
-    // TODO: Implement
-    throw new Error('getAll() not implemented yet');
+    //Call cleanup() dulu
+    cleanup()
+    //Return sessions array
+    return sessions
 }
 
 /**
- * TODO: Implement destroyByUserId()
- * 
+ * Implement destroyByUserId()
+ *
  * Destroy all sessions untuk user tertentu
- * 
+ *
  * @param {number} userId - User ID
  * @returns {number} Jumlah sessions yang dihapus
- * 
- * HINTS:
- * - Filter out sessions dengan userId tersebut
- * - Count berapa yang dihapus
- * - Save
  */
 function destroyByUserId(userId) {
-    // TODO: Implement
-    throw new Error('destroyByUserId() not implemented yet');
+    //Filter out sessions dengan userId tersebut
+    const initialLength = sessions.length
+    sessions = sessions.filter((s) => s.userId !== userId)
+
+    //Count berapa yang dihapus
+    const removedCount = initialLength - sessions.length
+
+    //Save
+    if (removedCount > 0) {
+        save()
+    }
+
+    return removedCount
 }
 
-// TODO: Uncomment setelah load() diimplementasi
-// Load sessions saat module di-import
-// load();
+//load session saat module diimport
+load()
 
-// TODO: Setup periodic cleanup (setiap 1 jam)
-// setInterval(() => {
-//     cleanup();
-// }, 60 * 60 * 1000);
+//periodic cleanup setiap 1 jam
+setInterval(() => {
+    cleanup()
+}, 60 * 60 * 1000)
 
 module.exports = {
     load,
@@ -189,5 +241,5 @@ module.exports = {
     destroy,
     cleanup,
     getAll,
-    destroyByUserId
-};
+    destroyByUserId,
+}
