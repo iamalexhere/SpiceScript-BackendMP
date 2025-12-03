@@ -124,15 +124,24 @@ async function signOut(req, res) {
  * 2. Send user data dengan status 200
  */
 async function getCurrentUser(req, res) {
-    // TODO: Implement
-    res.writeHead(501, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-        success: false,
-        error: {
-            message: 'getCurrentUser() not implemented yet',
-            code: 'NOT_IMPLEMENTED'
-        }
-    }));
+
+    try {
+        const user = req.user;
+
+        const responseData = {
+                success: true,
+                data: {
+                    user: user
+                }
+            }
+
+        res.writeHead(200, {'Content-Type': 'application/json'});
+
+        res.end(JSON.stringify(responseData));
+    } catch (error) {
+        console.log('Error getting current user: ', error);
+    }
+
 }
 
 module.exports = {

@@ -25,6 +25,8 @@
 .catalog-logo {
     max-width: 150px;
     height: auto;
+    cursor: pointer;
+
 }
 
 .search-container {
@@ -153,4 +155,33 @@ body {
     text-align: center;
     margin-bottom: 30px;
     color: #555;
+}
+
+#createRecipeBtn {
+    display: none;
+    padding: 8px 16px;
+    background: #ff3b00;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#signInBtn {
+    padding: 8px 16px; 
+    background: #ff3b00; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer;
+}
+
+#signOutBtn {
+    display: none; 
+    padding: 8px 16px; 
+    background: #ff3b00; 
+    color: white; 
+    border: none; 
+    border-radius: 5px;
+    cursor: pointer;
 }
