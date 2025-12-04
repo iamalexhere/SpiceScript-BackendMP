@@ -12,11 +12,9 @@
 <body>
     <div class="navbar">
         <img class="catalog-logo" src="../icons/SpiceScript-Logo-Fixed.png" alt="SpiceScript Logo"
-            style="cursor: pointer;" onclick="window.location.href='/catalog'">
-        <div class="nav-buttons" style="display: flex; gap: 15px; align-items: center;">
-            <button class="nav-btn"
-                style="padding: 8px 16px; background: #ff3b00; color: white; border: none; border-radius: 5px; cursor: pointer;"
-                onclick="window.location.href='/catalog'">← Back to Catalog</button>
+            onclick="window.location.href='/catalog'">
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="window.location.href='/catalog'">← Back to Catalog</button>
         </div>
     </div>
     <div class="wrapper">
@@ -28,7 +26,8 @@
                 <!-- Recipe Name -->
                 <div class="form-group">
                     <label for="recipe-name">Recipe Name *</label>
-                    <input name="recipe-name" type="text" id="recipe-name" class="form-input" placeholder="e.g., Semangka Bakar" required>
+                    <input name="recipe-name" type="text" id="recipe-name" class="form-input"
+                        placeholder="e.g., Semangka Bakar" required>
                 </div>
 
                 <!-- Description -->

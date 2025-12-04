@@ -65,8 +65,8 @@ function renderCatalog(recipes) {
 
     if (!recipes || recipes.length === 0) {
         searchContainer.innerHTML = `
-            <h2 style="text-align: center; padding-top: 2em;">No recipes found!</h2>
-            <p style="text-align: center;">Be the first to add one!</p>
+            <h2 class="no-recipes-title">No recipes found!</h2>
+            <p class="no-recipes-text">Be the first to add one!</p>
         `;
         catalogContainer.innerHTML = '';
         return;
@@ -75,12 +75,12 @@ function renderCatalog(recipes) {
     searchContainer.innerHTML = ''; // reset search message if found
 
     const htmlCard = recipes.map(recipe => `
-        <div class="card" data-recipe-id="${recipe.id}" style="cursor: pointer;">
-            <img src="${recipe.imagePath || '../images/default-recipe.jpg'}" class="image-container" alt="${recipe.recipeName}">
+        <div class="card clickable" data-recipe-id="${recipe.id}">
+            <img src="${recipe.imagePath || '/images/default-recipe.jpg'}" class="image-container" alt="${recipe.recipeName}">
             <div class="card-inner-container">
                 <h4><b>${recipe.recipeName}</b></h4>
                 <p>${recipe.description}</p>
-                <small style="color: #888;">by ${recipe.authorName || 'Anonymous'}</small>
+                <small class="recipe-author">by ${recipe.authorName || 'Anonymous'}</small>
             </div>
         </div>
     `).join('');
@@ -97,7 +97,6 @@ function renderCatalog(recipes) {
     });
 }
 
-// Update nav buttons based on auth state
 function updateNavButtons() {
     const signInBtn = document.getElementById('signInBtn');
     const signOutBtn = document.getElementById('signOutBtn');
@@ -105,14 +104,14 @@ function updateNavButtons() {
 
     if (currentUser) {
         // User is logged in
-        signInBtn.style.display = 'none';
-        signOutBtn.style.display = 'block';
-        createRecipeBtn.style.display = 'block';
+        signInBtn.classList.add('hidden');
+        signOutBtn.classList.remove('hidden');
+        createRecipeBtn.classList.remove('hidden');
     } else {
         // User is guest
-        signInBtn.style.display = 'block';
-        signOutBtn.style.display = 'none';
-        createRecipeBtn.style.display = 'none';
+        signInBtn.classList.remove('hidden');
+        signOutBtn.classList.add('hidden');
+        createRecipeBtn.classList.add('hidden');
     }
 }
 

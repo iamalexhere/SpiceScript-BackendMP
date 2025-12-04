@@ -1,5 +1,5 @@
 /**
- * Recipe Model - TODO: IMPLEMENT
+ * Recipe Model
  * 
  * Model untuk mengelola data recipes:
  * - CRUD operations untuk recipes
@@ -29,15 +29,9 @@ const recipes = [];
 const RECIPES_FILE = config.dataFiles.recipes;
 
 /**
- * TODO: Implement loadRecipes()
- * 
  * Load recipes dari file JSON
  * 
  * @returns {Array} Array of recipe objects
- * 
- * HINTS:
- * - Similar dengan User.loadUsers()
- * - Check file exists, read, parse JSON
  */
 function loadRecipes() {
     try {
@@ -46,10 +40,10 @@ function loadRecipes() {
         if (!fs.existsSync(RECIPES_FILE)) {
             return [];
         }
-        
+
         // fs.readFileSync digunakan untuk membaca isi file secara sinkronus
         const content = fs.readFileSync(RECIPES_FILE, 'utf-8');
-        
+
         // Parse json ke js object
         const recipes = JSON.parse(content);
 
@@ -61,88 +55,58 @@ function loadRecipes() {
 }
 
 /**
- * TODO: Implement saveRecipes()
- * 
  * Save recipes ke file JSON
  * 
  * @param {Array} recipes - Array of recipe objects
- * 
- * HINTS:
- * - Similar dengan User.saveUsers()
- * - JSON.stringify dengan pretty print
  */
 function saveRecipes(recipes) {
-    // TODO: Implement
-    throw new Error('saveRecipes() not implemented yet');
+    try {
+        const data = JSON.stringify(recipes, null, 2);
+        fs.writeFileSync(RECIPES_FILE, data, 'utf-8');
+    } catch (error) {
+        console.error('Error saving recipes:', error);
+        throw error;
+    }
 }
 
 /**
- * TODO: Implement findAll()
- * 
  * Get semua recipes
  * 
  * @returns {Array} Array of all recipes
- * 
- * HINTS:
- * - Load dengan loadRecipes()
- * - Return semua recipes (tidak perlu filter password seperti User)
  */
 function findAll() {
-   return loadRecipes();
+    return loadRecipes();
 }
 
 /**
- * TODO: Implement findById()
- * 
  * Find recipe by ID
  * 
  * @param {number} id - Recipe ID
  * @returns {Object|null} Recipe object atau null jika tidak found
- * 
- * HINTS:
- * - Load recipes
- * - Use find() method
  */
 function findById(id) {
-    // TODO: Implement
-    throw new Error('findById() not implemented yet');
+    const recipes = loadRecipes();
+    return recipes.find(recipe => recipe.id === parseInt(id)) || null;
 }
 
 /**
- * TODO: Implement findByAuthor()
- * 
  * Find recipes by author ID
  * 
  * @param {number} authorId - User ID dari author
  * @returns {Array} Array of recipes dari author tersebut
- * 
- * HINTS:
- * - Load recipes
- * - Use filter() untuk cari recipes dengan authorId === parseInt(authorId)
  */
 function findByAuthor(authorId) {
-    // TODO: Implement
-    throw new Error('findByAuthor() not implemented yet');
+    const recipes = loadRecipes();
+    return recipes.filter(recipe => recipe.authorId === parseInt(authorId));
 }
 
 /**
- * TODO: Implement create()
- * 
  * Create recipe baru
  * 
  * @param {Object} recipeData - Data recipe baru
  * @param {number} authorId - User ID dari pembuat recipe
  * @param {string} authorName - Username dari pembuat recipe
  * @returns {Object} Created recipe
- * 
- * HINTS:
- * - Generate ID baru (max ID + 1)
- * - Create recipe object dengan fields:
- *   - recipeName, description, ingredients, directions dari recipeData
- *   - imagePath (default '../images/default-recipe.jpg' jika kosong)
- *   - authorId, authorName dari parameter
- *   - createdAt, updatedAt dengan new Date().toISOString()
- * - Add ke recipes array dan save
  */
 function create(recipeData, authorId, authorName) {
     const data = fs.readFileSync(RECIPES_FILE, 'utf8');
@@ -157,7 +121,7 @@ function create(recipeData, authorId, authorName) {
         description: recipeData.description,
         ingredients: recipeData.ingredients,
         directions: recipeData.directions,
-        imagePath: "../images/default-recipe.jpg",
+        imagePath: recipeData.imagePath || "/images/default-recipe.jpg",
         authorId: authorId,
         authorName: authorName,
         createdAt: new Date().toISOString(),
@@ -171,66 +135,81 @@ function create(recipeData, authorId, authorName) {
 }
 
 /**
- * TODO: Implement update()
- * 
  * Update recipe
  * 
  * @param {number} id - Recipe ID
  * @param {Object} updateData - Data yang akan diupdate
  * @param {number} userId - User ID yang melakukan update (untuk authorization)
  * @returns {Object|null} Updated recipe atau null jika tidak found/unauthorized
- * 
- * HINTS:
- * - Find recipe index
- * - Check authorization: recipes[index].authorId === userId
- * - Throw error jika bukan author: "Unauthorized: Anda hanya bisa mengubah resep Anda sendiri"
- * - Update dengan spread operator
- * - Prevent changing: id, authorId, authorName, createdAt
- * - Update updatedAt timestamp
- * - Save dan return
  */
 function update(id, updateData, userId) {
-    // TODO: Implement
-    throw new Error('update() not implemented yet');
+    const recipes = loadRecipes();
+    const index = recipes.findIndex(recipe => recipe.id === parseInt(id));
+
+    if (index === -1) {
+        return null;
+    }
+
+    if (recipes[index].authorId !== parseInt(userId)) {
+        throw new Error('Unauthorized: Anda hanya bisa mengubah resep Anda sendiri');
+    }
+
+    const updatedRecipe = {
+        ...recipes[index],
+        ...updateData,
+        id: recipes[index].id,
+        authorId: recipes[index].authorId,
+        authorName: recipes[index].authorName,
+        createdAt: recipes[index].createdAt,
+        updatedAt: new Date().toISOString()
+    };
+
+    recipes[index] = updatedRecipe;
+    saveRecipes(recipes);
+
+    return updatedRecipe;
 }
 
 /**
- * TODO: Implement deleteRecipe()
- * 
  * Delete recipe
  * 
  * @param {number} id - Recipe ID
  * @param {number} userId - User ID yang melakukan delete (untuk authorization)
  * @returns {boolean} true jika berhasil delete, false jika tidak found
- * 
- * HINTS:
- * - Find recipe index
- * - Check authorization (sama seperti update)
- * - Remove dengan splice(index, 1)
- * - Save
- * - Return true/false
  */
 function deleteRecipe(id, userId) {
-    // TODO: Implement
-    throw new Error('deleteRecipe() not implemented yet');
+    const recipes = loadRecipes();
+    const index = recipes.findIndex(recipe => recipe.id === parseInt(id));
+
+    if (index === -1) {
+        return false;
+    }
+
+    if (recipes[index].authorId !== parseInt(userId)) {
+        throw new Error('Unauthorized: Anda hanya bisa menghapus resep Anda sendiri');
+    }
+
+    recipes.splice(index, 1);
+    saveRecipes(recipes);
+
+    return true;
 }
 
 /**
- * TODO: Implement search()
- * 
  * Search recipes by name atau description
  * 
  * @param {string} query - Search query
  * @returns {Array} Array of matching recipes
- * 
- * HINTS:
- * - Load recipes
- * - Convert query ke toLowerCase()
- * - Use filter() untuk cari recipes yang recipeName atau description includes query
  */
 function search(query) {
-    // TODO: Implement
-    throw new Error('search() not implemented yet');
+    const recipes = loadRecipes();
+    const searchQuery = query.toLowerCase();
+
+    return recipes.filter(recipe => {
+        const nameMatch = recipe.recipeName.toLowerCase().includes(searchQuery);
+        const descMatch = recipe.description.toLowerCase().includes(searchQuery);
+        return nameMatch || descMatch;
+    });
 }
 
 module.exports = {

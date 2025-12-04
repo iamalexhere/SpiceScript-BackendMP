@@ -38,6 +38,41 @@ body {
 .catalog-logo {
     max-width: 150px;
     height: auto;
+    cursor: pointer;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.nav-btn {
+    padding: 8px 16px;
+    background: #ff3b00;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.nav-btn:hover {
+    background-color: var(--secondary-orange);
+}
+
+.loading-text {
+    text-align: center;
+    padding: 40px;
+}
+
+.hidden {
+    display: none;
+}
+
+.recipe-meta {
+    color: #888;
+    margin-top: 10px;
 }
 
 
@@ -245,4 +280,12 @@ body {
     background: var(--secondary-orange);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     transform: translateY(-1px);
+}
+
+.EditButton-container .delete-btn {
+    background: #dc3545;
+}
+
+.EditButton-container .delete-btn:hover {
+    background: #c82333;
 }

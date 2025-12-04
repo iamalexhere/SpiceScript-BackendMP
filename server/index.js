@@ -82,7 +82,7 @@ const server = http.createServer(async (req, res) => {
         filePath = path.join(__dirname, '../html/sign-up.html');
     } else if (req.url.startsWith('/details')) {
         filePath = path.join(__dirname, '../html/details.html');
-    } else if (req.url === '/entry_form') {
+    } else if (req.url.startsWith('/entry_form')) {
         filePath = path.join(__dirname, '../html/entry_form.html');
     }
     // Serve static assets (CSS, JS, images, icons)
@@ -135,8 +135,8 @@ server.listen(config.server.port, config.server.host, () => {
     console.log('='.repeat(60));
     console.log('');
     console.log('  Test Users (untuk login):');
-    console.log('    Username: johndoe    | Password: password123');
-    console.log('    Username: janesmith  | Password: mypassword');
-    console.log('    Username: petermartin| Password: testpass');
+    console.log('    Username: john.doe@example.com     | Password: password123');
+    console.log('    Username: jane.smith@example.com   | Password: mypassword');
+    console.log('    Username: peter.martin@example.com | Password: testpass');
     console.log('='.repeat(60));
 });

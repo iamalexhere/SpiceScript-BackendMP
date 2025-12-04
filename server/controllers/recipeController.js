@@ -1,5 +1,5 @@
 /**
- * Recipe Controller - TODO: IMPLEMENT
+ * Recipe Controller
  * 
  * Controller untuk handle recipe operations:
  * - Get all recipes (public)
@@ -13,8 +13,6 @@ const { validateRecipe } = require('../utils/validation');
 
 
 /**
- * TODO: Implement getAllRecipes()
- * 
  * Get All Recipes
  * 
  * GET /api/recipes
@@ -22,10 +20,6 @@ const { validateRecipe } = require('../utils/validation');
  * 
  * @param {Object} req - Request object
  * @param {Object} res - Response object
- * 
- * IMPLEMENTATION STEPS:
- * 1. Get all recipes dengan Recipe.findAll()
- * 2. Send response 200 dengan recipes data dan count
  */
 async function getAllRecipes(req, res) {
     try {
@@ -38,7 +32,7 @@ async function getAllRecipes(req, res) {
             }
         }
 
-        res.writeHead(200, {'Content-Type': 'application/json'});
+        res.writeHead(200, { 'Content-Type': 'application/json' });
 
         res.end(JSON.stringify(responseData));
 
@@ -48,8 +42,6 @@ async function getAllRecipes(req, res) {
 }
 
 /**
- * TODO: Implement getRecipeById()
- * 
  * Get Recipe by ID
  * 
  * GET /api/recipes/:id
@@ -57,28 +49,43 @@ async function getAllRecipes(req, res) {
  * 
  * @param {Object} req - Request object (req.params.id dari router)
  * @param {Object} res - Response object
- * 
- * IMPLEMENTATION STEPS:
- * 1. Get recipeId dari req.params.id
- * 2. Find recipe dengan Recipe.findById()
- * 3. Jika tidak found, return 404
- * 4. Send recipe data dengan status 200
  */
 async function getRecipeById(req, res) {
-    // TODO: Implement
-    res.writeHead(501, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-        success: false,
-        error: {
-            message: 'getRecipeById() not implemented yet',
-            code: 'NOT_IMPLEMENTED'
+    try {
+        const recipeId = req.params.id;
+        const recipe = Recipe.findById(recipeId);
+
+        if (!recipe) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Recipe not found',
+                    code: 'NOT_FOUND'
+                }
+            }));
+            return;
         }
-    }));
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: true,
+            data: { recipe }
+        }));
+    } catch (error) {
+        console.error('Error getting recipe by ID:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: false,
+            error: {
+                message: 'Internal server error',
+                code: 'INTERNAL_ERROR'
+            }
+        }));
+    }
 }
 
 /**
- * TODO: Implement createRecipe()
- * 
  * Create New Recipe
  * 
  * POST /api/recipes
@@ -87,47 +94,143 @@ async function getRecipeById(req, res) {
  * 
  * @param {Object} req - Request object (req.user dari auth middleware)
  * @param {Object} res - Response object
- * 
- * IMPLEMENTATION STEPS:
- * 1. Get recipeData dari req.body
- * 2. Validate dengan validateRecipe()
- * 3. Jika validation gagal, return 400
- * 4. Get user dari req.user
- * 5. Create recipe dengan Recipe.create(recipeData, user.id, user.username)
- * 6. Send response 201 dengan recipe data
  */
 async function createRecipe(req, res) {
-    const recipeData = {
-        recipeName: req.body.recipeName,
-        description: req.body.description,
-        ingredients: req.body.ingredients,
-        directions: req.body.directions,
-    };
+    try {
+        // Check if request is multipart/form-data
+        const contentType = req.headers['content-type'];
+        if (!contentType || !contentType.includes('multipart/form-data')) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Content-Type must be multipart/form-data',
+                    code: 'INVALID_CONTENT_TYPE'
+                }
+            }));
+            return;
+        }
 
-    if (!validateRecipe(recipeData)) {
-        res.statusCode = 400;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ error: 'Missing required fields' }));
-        return;
+        // Parse multipart form data
+        const { parseMultipartForm } = require('../utils/multipartParser');
+        const { fields, files } = await parseMultipartForm(req, './images');
+
+        const recipeData = {
+            recipeName: fields.recipeName,
+            description: fields.description,
+            ingredients: fields.ingredients,
+            directions: fields.directions,
+        };
+
+        // Validate recipe data
+        const validation = validateRecipe(recipeData);
+        if (!validation.valid) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Missing required fields',
+                    code: 'VALIDATION_ERROR',
+                    details: validation.errors
+                }
+            }));
+            return;
+        }
+
+        // Validate image is uploaded
+        if (!files.image) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Recipe image is required',
+                    code: 'IMAGE_REQUIRED'
+                }
+            }));
+            return;
+        }
+
+        // Validate image type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(files.image.contentType)) {
+            // Delete uploaded file
+            const fs = require('fs');
+            fs.unlinkSync(files.image.filepath);
+
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Only JPEG, PNG, and WebP images are allowed',
+                    code: 'INVALID_IMAGE_TYPE'
+                }
+            }));
+            return;
+        }
+
+        // Validate image size (max 5MB)
+        const maxSize = 5 * 1024 * 1024;
+        if (files.image.size > maxSize) {
+            // Delete uploaded file
+            const fs = require('fs');
+            fs.unlinkSync(files.image.filepath);
+
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Image size must be less than 5MB',
+                    code: 'IMAGE_TOO_LARGE'
+                }
+            }));
+            return;
+        }
+
+        // Check authentication
+        const user = req.user;
+        if (!user || !user.id || !user.username) {
+            // Delete uploaded file
+            const fs = require('fs');
+            fs.unlinkSync(files.image.filepath);
+
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Unauthorized',
+                    code: 'UNAUTHORIZED'
+                }
+            }));
+            return;
+        }
+
+        // Set image path (relative to web root)
+        recipeData.imagePath = `/images/${files.image.filename}`;
+
+        // Create recipe
+        const newRecipe = Recipe.create(recipeData, user.id, user.username);
+
+        res.writeHead(201, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: true,
+            data: {
+                recipe: newRecipe
+            }
+        }));
+    } catch (error) {
+        console.error('Error creating recipe:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: false,
+            error: {
+                message: 'Internal server error',
+                code: 'INTERNAL_ERROR'
+            }
+        }));
     }
-
-    const user = req.user;
-    if (!user || !user.id || !user.username) {
-        res.statusCode = 401;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ error: 'Unauthorized' }));
-    }
-
-    const newRecipe = Recipe.create(recipeData, user.id, user.username);
-
-    res.statusCode = 201;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(newRecipe));
 }
 
 /**
- * TODO: Implement updateRecipe()
- * 
  * Update Recipe
  * 
  * PUT /api/recipes/:id
@@ -136,32 +239,151 @@ async function createRecipe(req, res) {
  * 
  * @param {Object} req - Request object
  * @param {Object} res - Response object
- * 
- * IMPLEMENTATION STEPS:
- * 1. Get recipeId dari req.params.id
- * 2. Get updateData dari req.body
- * 3. Validate dengan validateRecipe()
- * 4. Get user dari req.user
- * 5. Update dengan Recipe.update(recipeId, updateData, user.id)
- * 6. Handle authorization error (403)
- * 7. Handle not found (404)
- * 8. Send updated recipe dengan status 200
  */
 async function updateRecipe(req, res) {
-    // TODO: Implement
-    res.writeHead(501, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-        success: false,
-        error: {
-            message: 'updateRecipe() not implemented yet',
-            code: 'NOT_IMPLEMENTED'
+    try {
+        const recipeId = req.params.id;
+        const contentType = req.headers['content-type'];
+
+        let updateData = {};
+        let newImagePath = null;
+
+        // Check if multipart/form-data (with possible file upload)
+        if (contentType && contentType.includes('multipart/form-data')) {
+            const { parseMultipartForm } = require('../utils/multipartParser');
+            const { fields, files } = await parseMultipartForm(req, './images');
+
+            updateData = {
+                recipeName: fields.recipeName,
+                description: fields.description,
+                ingredients: fields.ingredients,
+                directions: fields.directions
+            };
+
+            // If new image uploaded, validate and use it
+            if (files.image) {
+                // Validate image type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                if (!allowedTypes.includes(files.image.contentType)) {
+                    const fs = require('fs');
+                    fs.unlinkSync(files.image.filepath);
+
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: false,
+                        error: {
+                            message: 'Only JPEG, PNG, and WebP images are allowed',
+                            code: 'INVALID_IMAGE_TYPE'
+                        }
+                    }));
+                    return;
+                }
+
+                // Validate image size (max 5MB)
+                const maxSize = 5 * 1024 * 1024;
+                if (files.image.size > maxSize) {
+                    const fs = require('fs');
+                    fs.unlinkSync(files.image.filepath);
+
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: false,
+                        error: {
+                            message: 'Image size must be less than 5MB',
+                            code: 'IMAGE_TOO_LARGE'
+                        }
+                    }));
+                    return;
+                }
+
+                newImagePath = `/images/${files.image.filename}`;
+            }
+        } else {
+            // JSON request (fallback)
+            updateData = {
+                recipeName: req.body.recipeName,
+                description: req.body.description,
+                ingredients: req.body.ingredients,
+                directions: req.body.directions
+            };
         }
-    }));
+
+        const validation = validateRecipe(updateData);
+        if (!validation.valid) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Missing required fields',
+                    code: 'VALIDATION_ERROR',
+                    details: validation.errors
+                }
+            }));
+            return;
+        }
+
+        const user = req.user;
+        if (!user || !user.id) {
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Unauthorized',
+                    code: 'UNAUTHORIZED'
+                }
+            }));
+            return;
+        }
+
+        // If new image was uploaded, add to updateData
+        if (newImagePath) {
+            updateData.imagePath = newImagePath;
+        }
+
+        const updatedRecipe = Recipe.update(recipeId, updateData, user.id);
+
+        if (!updatedRecipe) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Recipe not found',
+                    code: 'NOT_FOUND'
+                }
+            }));
+            return;
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: true,
+            data: { recipe: updatedRecipe }
+        }));
+    } catch (error) {
+        if (error.message.includes('Unauthorized')) {
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: error.message,
+                    code: 'FORBIDDEN'
+                }
+            }));
+        } else {
+            console.error('Error updating recipe:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Internal server error',
+                    code: 'INTERNAL_ERROR'
+                }
+            }));
+        }
+    }
 }
 
 /**
- * TODO: Implement deleteRecipe()
- * 
  * Delete Recipe
  * 
  * DELETE /api/recipes/:id
@@ -169,25 +391,65 @@ async function updateRecipe(req, res) {
  * 
  * @param {Object} req - Request object
  * @param {Object} res - Response object
- * 
- * IMPLEMENTATION STEPS:
- * 1. Get recipeId dari req.params.id
- * 2. Get user dari req.user
- * 3. Delete dengan Recipe.delete(recipeId, user.id)
- * 4. Handle authorization error (403)
- * 5. Handle not found (404)
- * 6. Send success message dengan status 200
  */
 async function deleteRecipe(req, res) {
-    // TODO: Implement
-    res.writeHead(501, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-        success: false,
-        error: {
-            message: 'deleteRecipe() not implemented yet',
-            code: 'NOT_IMPLEMENTED'
+    try {
+        const recipeId = req.params.id;
+        const user = req.user;
+
+        if (!user || !user.id) {
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Unauthorized',
+                    code: 'UNAUTHORIZED'
+                }
+            }));
+            return;
         }
-    }));
+
+        const deleted = Recipe.delete(recipeId, user.id);
+
+        if (!deleted) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Recipe not found',
+                    code: 'NOT_FOUND'
+                }
+            }));
+            return;
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: true,
+            message: 'Recipe deleted successfully'
+        }));
+    } catch (error) {
+        if (error.message.includes('Unauthorized')) {
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: error.message,
+                    code: 'FORBIDDEN'
+                }
+            }));
+        } else {
+            console.error('Error deleting recipe:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Internal server error',
+                    code: 'INTERNAL_ERROR'
+                }
+            }));
+        }
+    }
 }
 
 module.exports = {

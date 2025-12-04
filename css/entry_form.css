@@ -29,6 +29,27 @@ body {
 .catalog-logo {
     max-width: 150px;
     height: auto;
+    cursor: pointer;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.nav-btn {
+    padding: 8px 16px;
+    background: #ff3b00;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.nav-btn:hover {
+    background-color: var(--secondary-orange);
 }
 
 

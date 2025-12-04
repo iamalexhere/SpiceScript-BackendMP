@@ -47,8 +47,6 @@ function loadUsers() {
 }
 
 /**
- * Implement saveUsers()
- *
  * Save users ke file JSON
  *
  * @param {Array} users - Array of user objects
