@@ -76,7 +76,7 @@ function renderCatalog(recipes) {
 
     const htmlCard = recipes.map(recipe => `
         <div class="card clickable" data-recipe-id="${recipe.id}">
-            <img src="${recipe.imagePath || '../images/default-recipe.jpg'}" class="image-container" alt="${recipe.recipeName}">
+            <img src="${recipe.imagePath || '/images/default-recipe.jpg'}" class="image-container" alt="${recipe.recipeName}">
             <div class="card-inner-container">
                 <h4><b>${recipe.recipeName}</b></h4>
                 <p>${recipe.description}</p>

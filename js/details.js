@@ -48,7 +48,7 @@ function renderRecipe(recipe) {
     recipeHeader.innerHTML = `
         <h1>${recipe.recipeName}</h1>
         <div class="featured-image">
-            <img src="${recipe.imagePath || '../images/default-recipe.jpg'}" alt="${recipe.recipeName}">
+            <img src="${recipe.imagePath || '/images/default-recipe.jpg'}" alt="${recipe.recipeName}">
         </div>
     `;
 

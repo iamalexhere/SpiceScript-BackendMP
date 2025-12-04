@@ -77,8 +77,13 @@ async function handleAPIRequest(req, res) {
 
         // POST /api/recipes - Create recipe (requires auth)
         if (path === '/api/recipes' && method === 'POST') {
-            const body = await parseBody(req);
-            req.body = body;
+            // Skip JSON parsing for multipart/form-data
+            // Will be parsed manually in controller
+            const contentType = req.headers['content-type'];
+            if (!contentType || !contentType.includes('multipart/form-data')) {
+                const body = await parseBody(req);
+                req.body = body;
+            }
 
             return authenticate(req, res, () => {
                 recipeController.createRecipe(req, res);

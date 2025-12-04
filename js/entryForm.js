@@ -40,14 +40,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const description = document.getElementById('description').value.trim();
         const ingredients = document.getElementById('ingredients').value.trim();
         const directions = document.getElementById('directions').value.trim();
+        const imageFile = inputFile.files[0];
 
-        // Note: Image upload akan ditambahkan nanti
-        // Untuk sekarang, kita bisa pakai placeholder atau skip
-        const imagePath = '../images/default-recipe.jpg';
-
-        // Validate
+        // Validate required fields
         if (!recipeName || !description || !ingredients || !directions) {
             alert('Please fill in all required fields!');
+            return;
+        }
+
+        // Validate image is required
+        if (!imageFile) {
+            alert('Please upload a recipe image!');
+            return;
+        }
+
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(imageFile.type)) {
+            alert('Only JPEG, PNG, and WebP images are allowed!');
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (imageFile.size > maxSize) {
+            alert('Image size must be less than 5MB!');
             return;
         }
 
@@ -56,19 +73,18 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.textContent = 'Submitting...';
 
         try {
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('recipeName', recipeName);
+            formData.append('description', description);
+            formData.append('ingredients', ingredients);
+            formData.append('directions', directions);
+            formData.append('image', imageFile);
+
             const response = await fetch('/api/recipes', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 credentials: 'include', // Important: Include session cookie
-                body: JSON.stringify({
-                    recipeName,
-                    description,
-                    imagePath,
-                    ingredients,
-                    directions
-                })
+                body: formData // Don't set Content-Type header, browser will set it automatically with boundary
             });
 
             const data = await response.json();

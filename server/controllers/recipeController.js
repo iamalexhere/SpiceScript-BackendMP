@@ -96,32 +96,138 @@ async function getRecipeById(req, res) {
  * @param {Object} res - Response object
  */
 async function createRecipe(req, res) {
-    const recipeData = {
-        recipeName: req.body.recipeName,
-        description: req.body.description,
-        ingredients: req.body.ingredients,
-        directions: req.body.directions,
-    };
+    try {
+        // Check if request is multipart/form-data
+        const contentType = req.headers['content-type'];
+        if (!contentType || !contentType.includes('multipart/form-data')) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Content-Type must be multipart/form-data',
+                    code: 'INVALID_CONTENT_TYPE'
+                }
+            }));
+            return;
+        }
 
-    if (!validateRecipe(recipeData)) {
-        res.statusCode = 400;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ error: 'Missing required fields' }));
-        return;
+        // Parse multipart form data
+        const { parseMultipartForm } = require('../utils/multipartParser');
+        const { fields, files } = await parseMultipartForm(req, './images');
+
+        const recipeData = {
+            recipeName: fields.recipeName,
+            description: fields.description,
+            ingredients: fields.ingredients,
+            directions: fields.directions,
+        };
+
+        // Validate recipe data
+        const validation = validateRecipe(recipeData);
+        if (!validation.valid) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Missing required fields',
+                    code: 'VALIDATION_ERROR',
+                    details: validation.errors
+                }
+            }));
+            return;
+        }
+
+        // Validate image is uploaded
+        if (!files.image) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Recipe image is required',
+                    code: 'IMAGE_REQUIRED'
+                }
+            }));
+            return;
+        }
+
+        // Validate image type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(files.image.contentType)) {
+            // Delete uploaded file
+            const fs = require('fs');
+            fs.unlinkSync(files.image.filepath);
+
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Only JPEG, PNG, and WebP images are allowed',
+                    code: 'INVALID_IMAGE_TYPE'
+                }
+            }));
+            return;
+        }
+
+        // Validate image size (max 5MB)
+        const maxSize = 5 * 1024 * 1024;
+        if (files.image.size > maxSize) {
+            // Delete uploaded file
+            const fs = require('fs');
+            fs.unlinkSync(files.image.filepath);
+
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Image size must be less than 5MB',
+                    code: 'IMAGE_TOO_LARGE'
+                }
+            }));
+            return;
+        }
+
+        // Check authentication
+        const user = req.user;
+        if (!user || !user.id || !user.username) {
+            // Delete uploaded file
+            const fs = require('fs');
+            fs.unlinkSync(files.image.filepath);
+
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Unauthorized',
+                    code: 'UNAUTHORIZED'
+                }
+            }));
+            return;
+        }
+
+        // Set image path (relative to web root)
+        recipeData.imagePath = `/images/${files.image.filename}`;
+
+        // Create recipe
+        const newRecipe = Recipe.create(recipeData, user.id, user.username);
+
+        res.writeHead(201, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: true,
+            data: {
+                recipe: newRecipe
+            }
+        }));
+    } catch (error) {
+        console.error('Error creating recipe:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: false,
+            error: {
+                message: 'Internal server error',
+                code: 'INTERNAL_ERROR'
+            }
+        }));
     }
-
-    const user = req.user;
-    if (!user || !user.id || !user.username) {
-        res.statusCode = 401;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ error: 'Unauthorized' }));
-    }
-
-    const newRecipe = Recipe.create(recipeData, user.id, user.username);
-
-    res.statusCode = 201;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(newRecipe));
 }
 
 /**
@@ -144,13 +250,16 @@ async function updateRecipe(req, res) {
             directions: req.body.directions
         };
 
-        if (!validateRecipe(updateData)) {
+
+        const validation = validateRecipe(updateData);
+        if (!validation.valid) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
                 success: false,
                 error: {
                     message: 'Missing required fields',
-                    code: 'VALIDATION_ERROR'
+                    code: 'VALIDATION_ERROR',
+                    details: validation.errors
                 }
             }));
             return;

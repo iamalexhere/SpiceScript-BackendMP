@@ -189,7 +189,6 @@ body {
 }
 
 #createRecipeBtn {
-    display: none;
     padding: 8px 16px;
     background: #ff3b00;
     color: white;
@@ -208,7 +207,6 @@ body {
 }
 
 #signOutBtn {
-    display: none;
     padding: 8px 16px;
     background: #ff3b00;
     color: white;

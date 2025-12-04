@@ -121,7 +121,7 @@ function create(recipeData, authorId, authorName) {
         description: recipeData.description,
         ingredients: recipeData.ingredients,
         directions: recipeData.directions,
-        imagePath: "../images/default-recipe.jpg",
+        imagePath: recipeData.imagePath || "/images/default-recipe.jpg",
         authorId: authorId,
         authorName: authorName,
         createdAt: new Date().toISOString(),
