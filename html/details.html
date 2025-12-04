@@ -11,15 +11,13 @@
 <body>
     <div class="navbar">
         <img class="catalog-logo" src="../icons/SpiceScript-Logo-Fixed.png" alt="SpiceScript Logo"
-            style="cursor: pointer;" onclick="window.location.href='/catalog'">
-        <div class="nav-buttons" style="display: flex; gap: 15px; align-items: center;">
-            <button class="nav-btn"
-                style="padding: 8px 16px; background: #ff3b00; color: white; border: none; border-radius: 5px; cursor: pointer;"
-                onclick="window.location.href='/catalog'">← Back to Catalog</button>
+            onclick="window.location.href='/catalog'">
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="window.location.href='/catalog'">← Back to Catalog</button>
         </div>
     </div>
 
-    <div class="EditButton-container" style="display: none;">
+    <div class="EditButton-container hidden">
         <!-- Edit/Delete buttons will be added here by JavaScript if user is author -->
     </div>
 
@@ -32,7 +30,7 @@
 
             <div class="recipe-content">
                 <!-- Recipe content will be loaded here -->
-                <p style="text-align: center; padding: 40px;">Loading recipe...</p>
+                <p class="loading-text">Loading recipe...</p>
             </div>
         </article>
     </main>

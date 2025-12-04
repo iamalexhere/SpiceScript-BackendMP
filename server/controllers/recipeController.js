@@ -1,5 +1,5 @@
 /**
- * Recipe Controller - TODO: IMPLEMENT
+ * Recipe Controller
  * 
  * Controller untuk handle recipe operations:
  * - Get all recipes (public)
@@ -13,8 +13,6 @@ const { validateRecipe } = require('../utils/validation');
 
 
 /**
- * TODO: Implement getAllRecipes()
- * 
  * Get All Recipes
  * 
  * GET /api/recipes
@@ -22,10 +20,6 @@ const { validateRecipe } = require('../utils/validation');
  * 
  * @param {Object} req - Request object
  * @param {Object} res - Response object
- * 
- * IMPLEMENTATION STEPS:
- * 1. Get all recipes dengan Recipe.findAll()
- * 2. Send response 200 dengan recipes data dan count
  */
 async function getAllRecipes(req, res) {
     try {
@@ -38,7 +32,7 @@ async function getAllRecipes(req, res) {
             }
         }
 
-        res.writeHead(200, {'Content-Type': 'application/json'});
+        res.writeHead(200, { 'Content-Type': 'application/json' });
 
         res.end(JSON.stringify(responseData));
 
@@ -48,8 +42,6 @@ async function getAllRecipes(req, res) {
 }
 
 /**
- * TODO: Implement getRecipeById()
- * 
  * Get Recipe by ID
  * 
  * GET /api/recipes/:id
@@ -57,28 +49,43 @@ async function getAllRecipes(req, res) {
  * 
  * @param {Object} req - Request object (req.params.id dari router)
  * @param {Object} res - Response object
- * 
- * IMPLEMENTATION STEPS:
- * 1. Get recipeId dari req.params.id
- * 2. Find recipe dengan Recipe.findById()
- * 3. Jika tidak found, return 404
- * 4. Send recipe data dengan status 200
  */
 async function getRecipeById(req, res) {
-    // TODO: Implement
-    res.writeHead(501, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-        success: false,
-        error: {
-            message: 'getRecipeById() not implemented yet',
-            code: 'NOT_IMPLEMENTED'
+    try {
+        const recipeId = req.params.id;
+        const recipe = Recipe.findById(recipeId);
+
+        if (!recipe) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Recipe not found',
+                    code: 'NOT_FOUND'
+                }
+            }));
+            return;
         }
-    }));
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: true,
+            data: { recipe }
+        }));
+    } catch (error) {
+        console.error('Error getting recipe by ID:', error);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: false,
+            error: {
+                message: 'Internal server error',
+                code: 'INTERNAL_ERROR'
+            }
+        }));
+    }
 }
 
 /**
- * TODO: Implement createRecipe()
- * 
  * Create New Recipe
  * 
  * POST /api/recipes
@@ -87,14 +94,6 @@ async function getRecipeById(req, res) {
  * 
  * @param {Object} req - Request object (req.user dari auth middleware)
  * @param {Object} res - Response object
- * 
- * IMPLEMENTATION STEPS:
- * 1. Get recipeData dari req.body
- * 2. Validate dengan validateRecipe()
- * 3. Jika validation gagal, return 400
- * 4. Get user dari req.user
- * 5. Create recipe dengan Recipe.create(recipeData, user.id, user.username)
- * 6. Send response 201 dengan recipe data
  */
 async function createRecipe(req, res) {
     const recipeData = {
@@ -126,8 +125,6 @@ async function createRecipe(req, res) {
 }
 
 /**
- * TODO: Implement updateRecipe()
- * 
  * Update Recipe
  * 
  * PUT /api/recipes/:id
@@ -136,32 +133,86 @@ async function createRecipe(req, res) {
  * 
  * @param {Object} req - Request object
  * @param {Object} res - Response object
- * 
- * IMPLEMENTATION STEPS:
- * 1. Get recipeId dari req.params.id
- * 2. Get updateData dari req.body
- * 3. Validate dengan validateRecipe()
- * 4. Get user dari req.user
- * 5. Update dengan Recipe.update(recipeId, updateData, user.id)
- * 6. Handle authorization error (403)
- * 7. Handle not found (404)
- * 8. Send updated recipe dengan status 200
  */
 async function updateRecipe(req, res) {
-    // TODO: Implement
-    res.writeHead(501, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-        success: false,
-        error: {
-            message: 'updateRecipe() not implemented yet',
-            code: 'NOT_IMPLEMENTED'
+    try {
+        const recipeId = req.params.id;
+        const updateData = {
+            recipeName: req.body.recipeName,
+            description: req.body.description,
+            ingredients: req.body.ingredients,
+            directions: req.body.directions
+        };
+
+        if (!validateRecipe(updateData)) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Missing required fields',
+                    code: 'VALIDATION_ERROR'
+                }
+            }));
+            return;
         }
-    }));
+
+        const user = req.user;
+        if (!user || !user.id) {
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Unauthorized',
+                    code: 'UNAUTHORIZED'
+                }
+            }));
+            return;
+        }
+
+        const updatedRecipe = Recipe.update(recipeId, updateData, user.id);
+
+        if (!updatedRecipe) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Recipe not found',
+                    code: 'NOT_FOUND'
+                }
+            }));
+            return;
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: true,
+            data: { recipe: updatedRecipe }
+        }));
+    } catch (error) {
+        if (error.message.includes('Unauthorized')) {
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: error.message,
+                    code: 'FORBIDDEN'
+                }
+            }));
+        } else {
+            console.error('Error updating recipe:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Internal server error',
+                    code: 'INTERNAL_ERROR'
+                }
+            }));
+        }
+    }
 }
 
 /**
- * TODO: Implement deleteRecipe()
- * 
  * Delete Recipe
  * 
  * DELETE /api/recipes/:id
@@ -169,25 +220,65 @@ async function updateRecipe(req, res) {
  * 
  * @param {Object} req - Request object
  * @param {Object} res - Response object
- * 
- * IMPLEMENTATION STEPS:
- * 1. Get recipeId dari req.params.id
- * 2. Get user dari req.user
- * 3. Delete dengan Recipe.delete(recipeId, user.id)
- * 4. Handle authorization error (403)
- * 5. Handle not found (404)
- * 6. Send success message dengan status 200
  */
 async function deleteRecipe(req, res) {
-    // TODO: Implement
-    res.writeHead(501, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-        success: false,
-        error: {
-            message: 'deleteRecipe() not implemented yet',
-            code: 'NOT_IMPLEMENTED'
+    try {
+        const recipeId = req.params.id;
+        const user = req.user;
+
+        if (!user || !user.id) {
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Unauthorized',
+                    code: 'UNAUTHORIZED'
+                }
+            }));
+            return;
         }
-    }));
+
+        const deleted = Recipe.delete(recipeId, user.id);
+
+        if (!deleted) {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Recipe not found',
+                    code: 'NOT_FOUND'
+                }
+            }));
+            return;
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: true,
+            message: 'Recipe deleted successfully'
+        }));
+    } catch (error) {
+        if (error.message.includes('Unauthorized')) {
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: error.message,
+                    code: 'FORBIDDEN'
+                }
+            }));
+        } else {
+            console.error('Error deleting recipe:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                success: false,
+                error: {
+                    message: 'Internal server error',
+                    code: 'INTERNAL_ERROR'
+                }
+            }));
+        }
+    }
 }
 
 module.exports = {

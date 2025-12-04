@@ -25,7 +25,6 @@ function validateEmail(email) {
  * 
  * Requirements:
  * - Minimal 6 karakter
- * - TODO: Bisa ditambahkan requirements lain (uppercase, number, special char)
  * 
  * @param {string} password - Password yang akan divalidasi
  * @returns {Object} { valid: boolean, message: string }
@@ -37,9 +36,6 @@ function validatePassword(password) {
             message: 'Password harus minimal 6 karakter'
         };
     }
-
-    // TODO: Tambahkan validasi tambahan jika diperlukan
-    // Contoh: harus ada uppercase, number, special character
 
     return { valid: true, message: '' };
 }

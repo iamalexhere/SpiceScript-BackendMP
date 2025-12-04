@@ -1,112 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Create Account</title>
-        <link rel="stylesheet" href="../css/sign-up.css" />
-    </head>
 
-    <body>
-        <div class="navbar">
-            <img
-                class="catalog-logo"
-                src="../icons/SpiceScript-Logo-Fixed.png"
-                alt="SpiceScript Logo"
-                style="cursor: pointer"
-                onclick="window.location.href='/catalog'"
-            />
-            <div
-                class="nav-buttons"
-                style="display: flex; gap: 15px; align-items: center"
-            >
-                <button
-                    class="nav-btn"
-                    style="
-                        padding: 8px 16px;
-                        background: #ff3b00;
-                        color: white;
-                        border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
-                    "
-                    onclick="window.location.href='/catalog'"
-                >
-                    ← Back to Catalog
-                </button>
-            </div>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Account</title>
+    <link rel="stylesheet" href="../css/sign-up.css" />
+</head>
+
+<body>
+    <div class="navbar">
+        <img class="catalog-logo" src="../icons/SpiceScript-Logo-Fixed.png" alt="SpiceScript Logo"
+            onclick="window.location.href='/catalog'" />
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="window.location.href='/catalog'">
+                ← Back to Catalog
+            </button>
         </div>
-        <div class="user-sign-up-page">
-            <div class="main-container">
-                <div style="text-align: center; margin-bottom: 20px">
-                    <img
-                        src="../icons/SpiceScript-Logo-Fixed.png"
-                        alt="SpiceScript Logo"
-                        style="max-width: 200px; height: auto"
-                    />
-                </div>
-                <h1 class="page-title">Sign Up</h1>
-
-                <div class="title-underline"></div>
-
-                <div class="input-item">
-                    <input
-                        type="text"
-                        id="username"
-                        placeholder="Username"
-                        required
-                    />
-                </div>
-
-                <div class="input-item">
-                    <input
-                        type="email"
-                        id="email"
-                        placeholder="Email Address"
-                        autocomplete="email"
-                        required
-                    />
-                </div>
-
-                <div class="input-item">
-                    <input
-                        type="password"
-                        id="password"
-                        placeholder="Password"
-                        required
-                    />
-                </div>
-
-                <div class="input-item">
-                    <input
-                        type="password"
-                        id="confirmPassword"
-                        placeholder="Confirm Password"
-                        required
-                    />
-                </div>
-
-                <div class="checkbox-item">
-                    <input type="checkbox" id="tos" />
-                    <label for="tos">
-                        i agree to the
-                        <a href="#" class="Link-text">Terms of Services</a>
-                    </label>
-                </div>
-
-                <button id="signUpBtn" class="btn disabled-btn" disabled>
-                    CREATE ACCOUNT
-                </button>
-
-                <span class="sign-in-wrapper">
-                    Already have an account?
-                    <a href="/sign-in" class="link-text sign-in-link">
-                        Sign in
-                    </a>
-                </span>
+    </div>
+    <div class="user-sign-up-page">
+        <div class="main-container">
+            <div class="logo-container">
+                <img src="../icons/SpiceScript-Logo-Fixed.png" alt="SpiceScript Logo" class="logo-image" />
             </div>
-        </div>
+            <h1 class="page-title">Sign Up</h1>
 
-        <script src="../js/sign-up.js"></script>
-    </body>
+            <div class="title-underline"></div>
+
+            <div class="input-item">
+                <input type="text" id="username" placeholder="Username" required />
+            </div>
+
+            <div class="input-item">
+                <input type="email" id="email" placeholder="Email Address" autocomplete="email" required />
+            </div>
+
+            <div class="input-item">
+                <input type="password" id="password" placeholder="Password" required />
+            </div>
+
+            <div class="input-item">
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" id="tos" />
+                <label for="tos">
+                    i agree to the
+                    <a href="#" class="Link-text">Terms of Services</a>
+                </label>
+            </div>
+
+            <button id="signUpBtn" class="btn disabled-btn" disabled>
+                CREATE ACCOUNT
+            </button>
+
+            <span class="sign-in-wrapper">
+                Already have an account?
+                <a href="/sign-in" class="link-text sign-in-link">
+                    Sign in
+                </a>
+            </span>
+        </div>
+    </div>
+
+    <script src="../js/sign-up.js"></script>
+</body>
+
 </html>

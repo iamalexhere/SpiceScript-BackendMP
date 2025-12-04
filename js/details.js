@@ -76,7 +76,7 @@ function renderRecipe(recipe) {
     recipeContent.innerHTML = `
         <div class="intro">
             <p>${recipe.description}</p>
-            <p style="color: #888; margin-top: 10px;">
+            <p class="recipe-meta">
                 <strong>By:</strong> ${recipe.authorName || 'Anonymous'}<br>
                 <strong>Created:</strong> ${new Date(recipe.createdAt).toLocaleDateString()}
             </p>
@@ -95,7 +95,6 @@ function renderRecipe(recipe) {
         </div>
     `;
 
-    // TODO: Add edit/delete buttons if user is author
     checkAuthAndShowEditButton(recipe);
 }
 
@@ -115,9 +114,9 @@ async function checkAuthAndShowEditButton(recipe) {
                     const editButtonContainer = document.querySelector('.EditButton-container');
                     editButtonContainer.innerHTML = `
                         <button onclick="editRecipe(${recipe.id})">Edit</button>
-                        <button onclick="deleteRecipe(${recipe.id})" style="background: #dc3545;">Delete</button>
+                        <button onclick="deleteRecipe(${recipe.id})" class="delete-btn">Delete</button>
                     `;
-                    editButtonContainer.style.display = 'block';
+                    editButtonContainer.classList.remove('hidden');
                 }
             }
         }
@@ -126,11 +125,8 @@ async function checkAuthAndShowEditButton(recipe) {
     }
 }
 
-// Edit recipe function (placeholder for now)
 function editRecipe(recipeId) {
     alert('Edit functionality coming soon!');
-    // TODO: Navigate to edit page or show edit modal
-    // window.location.href = `/entry_form?edit=${recipeId}`;
 }
 
 // Delete recipe function

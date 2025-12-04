@@ -29,6 +29,12 @@
 
 }
 
+.nav-buttons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
 .search-container {
     display: flex;
     width: 100%;
@@ -92,6 +98,27 @@ body {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
     transition: 0.3s;
     border-radius: 5px;
+}
+
+.card.clickable {
+    cursor: pointer;
+}
+
+.recipe-author {
+    color: #888;
+}
+
+.no-recipes-title {
+    text-align: center;
+    padding-top: 2em;
+}
+
+.no-recipes-text {
+    text-align: center;
+}
+
+.hidden {
+    display: none;
 }
 
 .card img {
@@ -172,20 +199,20 @@ body {
 }
 
 #signInBtn {
-    padding: 8px 16px; 
-    background: #ff3b00; 
-    color: white; 
-    border: none; 
-    border-radius: 5px; 
+    padding: 8px 16px;
+    background: #ff3b00;
+    color: white;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
 }
 
 #signOutBtn {
-    display: none; 
-    padding: 8px 16px; 
-    background: #ff3b00; 
-    color: white; 
-    border: none; 
+    display: none;
+    padding: 8px 16px;
+    background: #ff3b00;
+    color: white;
+    border: none;
     border-radius: 5px;
     cursor: pointer;
 }
