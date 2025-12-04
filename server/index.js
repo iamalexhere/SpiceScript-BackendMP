@@ -82,7 +82,7 @@ const server = http.createServer(async (req, res) => {
         filePath = path.join(__dirname, '../html/sign-up.html');
     } else if (req.url.startsWith('/details')) {
         filePath = path.join(__dirname, '../html/details.html');
-    } else if (req.url === '/entry_form') {
+    } else if (req.url.startsWith('/entry_form')) {
         filePath = path.join(__dirname, '../html/entry_form.html');
     }
     // Serve static assets (CSS, JS, images, icons)

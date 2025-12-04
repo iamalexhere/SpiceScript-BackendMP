@@ -100,8 +100,12 @@ async function handleAPIRequest(req, res) {
         // PUT /api/recipes/:id - Update recipe (requires auth)
         const updateRecipeMatch = matchRoute('/api/recipes/:id', path);
         if (updateRecipeMatch.match && method === 'PUT') {
-            const body = await parseBody(req);
-            req.body = body;
+            // Skip JSON parsing for multipart/form-data
+            const contentType = req.headers['content-type'];
+            if (!contentType || !contentType.includes('multipart/form-data')) {
+                const body = await parseBody(req);
+                req.body = body;
+            }
             req.params = updateRecipeMatch.params;
 
             return authenticate(req, res, () => {

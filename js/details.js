@@ -126,7 +126,7 @@ async function checkAuthAndShowEditButton(recipe) {
 }
 
 function editRecipe(recipeId) {
-    alert('Edit functionality coming soon!');
+    window.location.href = `/entry_form?id=${recipeId}`;
 }
 
 // Delete recipe function

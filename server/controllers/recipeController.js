@@ -243,13 +243,70 @@ async function createRecipe(req, res) {
 async function updateRecipe(req, res) {
     try {
         const recipeId = req.params.id;
-        const updateData = {
-            recipeName: req.body.recipeName,
-            description: req.body.description,
-            ingredients: req.body.ingredients,
-            directions: req.body.directions
-        };
+        const contentType = req.headers['content-type'];
 
+        let updateData = {};
+        let newImagePath = null;
+
+        // Check if multipart/form-data (with possible file upload)
+        if (contentType && contentType.includes('multipart/form-data')) {
+            const { parseMultipartForm } = require('../utils/multipartParser');
+            const { fields, files } = await parseMultipartForm(req, './images');
+
+            updateData = {
+                recipeName: fields.recipeName,
+                description: fields.description,
+                ingredients: fields.ingredients,
+                directions: fields.directions
+            };
+
+            // If new image uploaded, validate and use it
+            if (files.image) {
+                // Validate image type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                if (!allowedTypes.includes(files.image.contentType)) {
+                    const fs = require('fs');
+                    fs.unlinkSync(files.image.filepath);
+
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: false,
+                        error: {
+                            message: 'Only JPEG, PNG, and WebP images are allowed',
+                            code: 'INVALID_IMAGE_TYPE'
+                        }
+                    }));
+                    return;
+                }
+
+                // Validate image size (max 5MB)
+                const maxSize = 5 * 1024 * 1024;
+                if (files.image.size > maxSize) {
+                    const fs = require('fs');
+                    fs.unlinkSync(files.image.filepath);
+
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: false,
+                        error: {
+                            message: 'Image size must be less than 5MB',
+                            code: 'IMAGE_TOO_LARGE'
+                        }
+                    }));
+                    return;
+                }
+
+                newImagePath = `/images/${files.image.filename}`;
+            }
+        } else {
+            // JSON request (fallback)
+            updateData = {
+                recipeName: req.body.recipeName,
+                description: req.body.description,
+                ingredients: req.body.ingredients,
+                directions: req.body.directions
+            };
+        }
 
         const validation = validateRecipe(updateData);
         if (!validation.valid) {
@@ -276,6 +333,11 @@ async function updateRecipe(req, res) {
                 }
             }));
             return;
+        }
+
+        // If new image was uploaded, add to updateData
+        if (newImagePath) {
+            updateData.imagePath = newImagePath;
         }
 
         const updatedRecipe = Recipe.update(recipeId, updateData, user.id);
