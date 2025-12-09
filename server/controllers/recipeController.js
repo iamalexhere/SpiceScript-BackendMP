@@ -10,6 +10,7 @@
  */
 const Recipe = require('../models/Recipe');
 const { validateRecipe } = require('../utils/validation');
+const { sendJSON } = require('../routes/apiHandler');
 
 
 /**
@@ -32,9 +33,7 @@ async function getAllRecipes(req, res) {
             }
         }
 
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-
-        res.end(JSON.stringify(responseData));
+        sendJSON(req, res, 200, responseData);
 
     } catch (error) {
         console.log('Error finding all recipes:', error);
@@ -56,32 +55,30 @@ async function getRecipeById(req, res) {
         const recipe = Recipe.findById(recipeId);
 
         if (!recipe) {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            sendJSON(req, res, 404, {
                 success: false,
                 error: {
                     message: 'Recipe not found',
                     code: 'NOT_FOUND'
                 }
-            }));
+            });
             return;
         }
 
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
+        sendJSON(req, res, 200, {
             success: true,
             data: { recipe }
-        }));
+        });
     } catch (error) {
         console.error('Error getting recipe by ID:', error);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
+        console.error('Error getting recipe by ID:', error);
+        sendJSON(req, res, 500, {
             success: false,
             error: {
                 message: 'Internal server error',
                 code: 'INTERNAL_ERROR'
             }
-        }));
+        });
     }
 }
 
@@ -100,15 +97,13 @@ async function createRecipe(req, res) {
         // Check if request is multipart/form-data
         const contentType = req.headers['content-type'];
         if (!contentType || !contentType.includes('multipart/form-data')) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            return sendJSON(req, res, 400, {
                 success: false,
                 error: {
                     message: 'Content-Type must be multipart/form-data',
                     code: 'INVALID_CONTENT_TYPE'
                 }
-            }));
-            return;
+            });
         }
 
         // Parse multipart form data
@@ -125,28 +120,30 @@ async function createRecipe(req, res) {
         // Validate recipe data
         const validation = validateRecipe(recipeData);
         if (!validation.valid) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-                success: false,
-                error: {
-                    message: 'Missing required fields',
-                    code: 'VALIDATION_ERROR',
-                    details: validation.errors
-                }
-            }));
+            if (!validation.valid) {
+                return sendJSON(req, res, 400, {
+                    success: false,
+                    error: {
+                        message: 'Missing required fields',
+                        code: 'VALIDATION_ERROR',
+                        details: validation.errors
+                    }
+                });
+            }
             return;
         }
 
         // Validate image is uploaded
         if (!files.image) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-                success: false,
-                error: {
-                    message: 'Recipe image is required',
-                    code: 'IMAGE_REQUIRED'
-                }
-            }));
+            if (!files.image) {
+                return sendJSON(req, res, 400, {
+                    success: false,
+                    error: {
+                        message: 'Recipe image is required',
+                        code: 'IMAGE_REQUIRED'
+                    }
+                });
+            }
             return;
         }
 
@@ -155,17 +152,15 @@ async function createRecipe(req, res) {
         if (!allowedTypes.includes(files.image.contentType)) {
             // Delete uploaded file
             const fs = require('fs');
-            fs.unlinkSync(files.image.filepath);
+            try { fs.unlinkSync(files.image.filepath); } catch (e) { }
 
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            return sendJSON(req, res, 400, {
                 success: false,
                 error: {
                     message: 'Only JPEG, PNG, and WebP images are allowed',
                     code: 'INVALID_IMAGE_TYPE'
                 }
-            }));
-            return;
+            });
         }
 
         // Validate image size (max 5MB)
@@ -173,17 +168,15 @@ async function createRecipe(req, res) {
         if (files.image.size > maxSize) {
             // Delete uploaded file
             const fs = require('fs');
-            fs.unlinkSync(files.image.filepath);
+            try { fs.unlinkSync(files.image.filepath); } catch (e) { }
 
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            return sendJSON(req, res, 400, {
                 success: false,
                 error: {
                     message: 'Image size must be less than 5MB',
                     code: 'IMAGE_TOO_LARGE'
                 }
-            }));
-            return;
+            });
         }
 
         // Check authentication
@@ -191,17 +184,15 @@ async function createRecipe(req, res) {
         if (!user || !user.id || !user.username) {
             // Delete uploaded file
             const fs = require('fs');
-            fs.unlinkSync(files.image.filepath);
+            try { fs.unlinkSync(files.image.filepath); } catch (e) { }
 
-            res.writeHead(401, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            return sendJSON(req, res, 401, {
                 success: false,
                 error: {
                     message: 'Unauthorized',
                     code: 'UNAUTHORIZED'
                 }
-            }));
-            return;
+            });
         }
 
         // Set image path (relative to web root)
@@ -210,23 +201,22 @@ async function createRecipe(req, res) {
         // Create recipe
         const newRecipe = Recipe.create(recipeData, user.id, user.username);
 
-        res.writeHead(201, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
+        sendJSON(req, res, 201, {
             success: true,
             data: {
                 recipe: newRecipe
             }
-        }));
+        });
     } catch (error) {
         console.error('Error creating recipe:', error);
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
+        console.error('Error creating recipe:', error);
+        sendJSON(req, res, 500, {
             success: false,
             error: {
                 message: 'Internal server error',
                 code: 'INTERNAL_ERROR'
             }
-        }));
+        });
     }
 }
 
@@ -266,34 +256,30 @@ async function updateRecipe(req, res) {
                 const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
                 if (!allowedTypes.includes(files.image.contentType)) {
                     const fs = require('fs');
-                    fs.unlinkSync(files.image.filepath);
+                    try { fs.unlinkSync(files.image.filepath); } catch (e) { }
 
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({
+                    return sendJSON(req, res, 400, {
                         success: false,
                         error: {
                             message: 'Only JPEG, PNG, and WebP images are allowed',
                             code: 'INVALID_IMAGE_TYPE'
                         }
-                    }));
-                    return;
+                    });
                 }
 
                 // Validate image size (max 5MB)
                 const maxSize = 5 * 1024 * 1024;
                 if (files.image.size > maxSize) {
                     const fs = require('fs');
-                    fs.unlinkSync(files.image.filepath);
+                    try { fs.unlinkSync(files.image.filepath); } catch (e) { }
 
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({
+                    return sendJSON(req, res, 400, {
                         success: false,
                         error: {
                             message: 'Image size must be less than 5MB',
                             code: 'IMAGE_TOO_LARGE'
                         }
-                    }));
-                    return;
+                    });
                 }
 
                 newImagePath = `/images/${files.image.filename}`;
@@ -310,16 +296,14 @@ async function updateRecipe(req, res) {
 
         const validation = validateRecipe(updateData);
         if (!validation.valid) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            return sendJSON(req, res, 400, {
                 success: false,
                 error: {
                     message: 'Missing required fields',
                     code: 'VALIDATION_ERROR',
                     details: validation.errors
                 }
-            }));
-            return;
+            });
         }
 
         const user = req.user;
@@ -343,42 +327,37 @@ async function updateRecipe(req, res) {
         const updatedRecipe = Recipe.update(recipeId, updateData, user.id);
 
         if (!updatedRecipe) {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            return sendJSON(req, res, 404, {
                 success: false,
                 error: {
                     message: 'Recipe not found',
                     code: 'NOT_FOUND'
                 }
-            }));
-            return;
+            });
         }
 
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
+        sendJSON(req, res, 200, {
             success: true,
             data: { recipe: updatedRecipe }
-        }));
+        });
     } catch (error) {
         if (error.message.includes('Unauthorized')) {
-            res.writeHead(403, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            sendJSON(req, res, 403, {
                 success: false,
                 error: {
                     message: error.message,
                     code: 'FORBIDDEN'
                 }
-            }));
+            });
         } else {
             console.error('Error updating recipe:', error);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            sendJSON(req, res, 500, {
                 success: false,
                 error: {
                     message: 'Internal server error',
                     code: 'INTERNAL_ERROR'
                 }
-            }));
+            });
         }
     }
 }
@@ -412,42 +391,37 @@ async function deleteRecipe(req, res) {
         const deleted = Recipe.delete(recipeId, user.id);
 
         if (!deleted) {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            return sendJSON(req, res, 404, {
                 success: false,
                 error: {
                     message: 'Recipe not found',
                     code: 'NOT_FOUND'
                 }
-            }));
-            return;
+            });
         }
 
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
+        sendJSON(req, res, 200, {
             success: true,
             message: 'Recipe deleted successfully'
-        }));
+        });
     } catch (error) {
         if (error.message.includes('Unauthorized')) {
-            res.writeHead(403, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            sendJSON(req, res, 403, {
                 success: false,
                 error: {
                     message: error.message,
                     code: 'FORBIDDEN'
                 }
-            }));
+            });
         } else {
             console.error('Error deleting recipe:', error);
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
+            sendJSON(req, res, 500, {
                 success: false,
                 error: {
                     message: 'Internal server error',
                     code: 'INTERNAL_ERROR'
                 }
-            }));
+            });
         }
     }
 }

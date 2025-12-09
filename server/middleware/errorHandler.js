@@ -6,56 +6,60 @@
  * Digunakan sebagai last middleware dalam chain untuk catch semua errors
  */
 
+const { sendJSON } = require('../routes/apiHandler');
+
 /**
  * Send error response dengan format yang konsisten
  * 
+ * @param {Object} req - HTTP request object
  * @param {Object} res - HTTP response object
  * @param {number} statusCode - HTTP status code
  * @param {string} message - Error message
  * @param {string} code - Error code (optional)
  */
-function sendError(res, statusCode, message, code = 'ERROR') {
-    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
+function sendError(req, res, statusCode, message, code = 'ERROR') {
+    sendJSON(req, res, statusCode, {
         success: false,
         error: {
             message: message,
             code: code
         }
-    }));
+    });
 }
 
 /**
  * Handle different types of errors dan return appropriate response
  * 
  * @param {Error} error - Error object
+ * @param {Object} req - HTTP request object
  * @param {Object} res - HTTP response object
  */
-function handleError(error, res) {
+function handleError(error, req, res) {
     console.error('Error occurred:', error);
 
     // Validation errors
     if (error.name === 'ValidationError') {
-        return sendError(res, 400, error.message, 'VALIDATION_ERROR');
+        return sendError(req, res, 400, error.message, 'VALIDATION_ERROR');
     }
 
     // Authorization errors
     if (error.message.includes('Unauthorized')) {
-        return sendError(res, 403, error.message, 'FORBIDDEN');
+        return sendError(req, res, 403, error.message, 'FORBIDDEN');
     }
 
     // Not found errors
     if (error.message.includes('not found') || error.message.includes('tidak ditemukan')) {
-        return sendError(res, 404, error.message, 'NOT_FOUND');
+        return sendError(req, res, 404, error.message, 'NOT_FOUND');
     }
 
     // Duplicate/conflict errors
     if (error.message.includes('already exists') || error.message.includes('sudah digunakan')) {
-        return sendError(res, 409, error.message, 'CONFLICT');
+        return sendError(req, res, 409, error.message, 'CONFLICT');
     }
 
     // Default: Internal server error
     return sendError(
+        req,
         res,
         500,
         'Internal server error. Silakan coba lagi.',
@@ -66,31 +70,23 @@ function handleError(error, res) {
 /**
  * 404 Not Found handler
  * 
+ * @param {Object} req - HTTP request object
  * @param {Object} res - HTTP response object
  */
-function notFound(res) {
-    sendError(res, 404, 'Endpoint tidak ditemukan', 'NOT_FOUND');
+function notFound(req, res) {
+    sendError(req, res, 404, 'Endpoint tidak ditemukan', 'NOT_FOUND');
 }
 
 /**
  * 405 Method Not Allowed handler
  * 
+ * @param {Object} req - HTTP request object
  * @param {Object} res - HTTP response object
  * @param {string} allowedMethods - String of allowed methods (e.g., "GET, POST")
  */
-function methodNotAllowed(res, allowedMethods = '') {
-    res.writeHead(405, {
-        'Content-Type': 'application/json',
-        'Allow': allowedMethods
-    });
-    res.end(JSON.stringify({
-        success: false,
-        error: {
-            message: 'Method tidak diizinkan',
-            code: 'METHOD_NOT_ALLOWED',
-            allowedMethods: allowedMethods
-        }
-    }));
+function methodNotAllowed(req, res, allowedMethods = '') {
+    res.setHeader('Allow', allowedMethods);
+    sendError(req, res, 405, 'Method tidak diizinkan', 'METHOD_NOT_ALLOWED');
 }
 
 module.exports = {

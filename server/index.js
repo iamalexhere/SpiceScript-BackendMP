@@ -15,6 +15,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
 const config = require('./config/config');
 const { handleAPIRequest, isAPIRequest } = require('./routes/router');
 
@@ -38,18 +39,37 @@ const MIME_TYPES = {
  * @param {string} filePath - Path ke file
  * @param {Object} res - Response object
  * @param {string} contentType - MIME type
+ * @param {Object} req - Request object (needed for accept-encoding)
  */
-function serveFile(filePath, res, contentType) {
-    fs.readFile(filePath, (err, data) => {
-        if (err) {
+function serveFile(filePath, res, contentType, req) {
+    // 1. Cek Accept-Encoding
+    const acceptEncoding = req.headers['accept-encoding'] || '';
+
+    // 2. Siapkan Stream (Chunking otomatis via pipe)
+    const rawStream = fs.createReadStream(filePath);
+
+    // Handle error stream
+    rawStream.on('error', (err) => {
+        if (err.code === 'ENOENT') {
             res.writeHead(404, { 'Content-Type': 'text/html' });
             res.end('<h1>404 - File Not Found</h1>');
-            console.error(`Error reading file: ${filePath}`);
         } else {
-            res.writeHead(200, { 'Content-Type': contentType });
-            res.end(data);
+            res.writeHead(500);
+            res.end('Server Error');
         }
     });
+
+    // 3. Logic Kompresi
+    if (acceptEncoding.includes('gzip')) {
+        res.writeHead(200, {
+            'Content-Type': contentType,
+            'Content-Encoding': 'gzip'
+        });
+        rawStream.pipe(zlib.createGzip()).pipe(res);
+    } else {
+        res.writeHead(200, { 'Content-Type': contentType });
+        rawStream.pipe(res);
+    }
 }
 
 /**
@@ -102,7 +122,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     // Serve the file
-    serveFile(filePath, res, contentType);
+    serveFile(filePath, res, contentType, req);
 });
 
 /**

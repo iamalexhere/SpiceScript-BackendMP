@@ -15,6 +15,7 @@ const { parseCookies } = require('../utils/cookies');
 const Session = require('../models/Session');
 const User = require('../models/User');
 const config = require('../config/config');
+const { sendJSON } = require('../routes/apiHandler');
 
 /**
  * Authentication Middleware
@@ -44,7 +45,7 @@ function authenticate(req, res, next) {
 
         if (!sessionId) {
             // Tidak ada session cookie
-            return sendUnauthorized(res, 'Session tidak ditemukan. Silakan login.');
+            return sendUnauthorized(req, res, 'Session tidak ditemukan. Silakan login.');
         }
 
         // 3. Validate session
@@ -52,7 +53,7 @@ function authenticate(req, res, next) {
 
         if (!session) {
             // Session tidak valid atau expired
-            return sendUnauthorized(res, 'Session tidak valid atau sudah expired. Silakan login kembali.');
+            return sendUnauthorized(req, res, 'Session tidak valid atau sudah expired. Silakan login kembali.');
         }
 
         // 4. Load user data
@@ -61,7 +62,7 @@ function authenticate(req, res, next) {
         if (!user) {
             // User tidak ditemukan (mungkin sudah dihapus)
             Session.destroy(sessionId);
-            return sendUnauthorized(res, 'User tidak ditemukan. Silakan login kembali.');
+            return sendUnauthorized(req, res, 'User tidak ditemukan. Silakan login kembali.');
         }
 
         // 5. Attach user dan session ke request object
@@ -74,7 +75,7 @@ function authenticate(req, res, next) {
 
     } catch (error) {
         console.error('Authentication error:', error);
-        return sendUnauthorized(res, 'Authentication error');
+        return sendUnauthorized(req, res, 'Authentication error');
     }
 }
 
@@ -84,15 +85,21 @@ function authenticate(req, res, next) {
  * @param {Object} res - HTTP response object
  * @param {string} message - Error message
  */
-function sendUnauthorized(res, message = 'Unauthorized') {
-    res.writeHead(401, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
+/**
+ * Helper function untuk send 401 Unauthorized response
+ * 
+ * @param {Object} req - HTTP request object
+ * @param {Object} res - HTTP response object
+ * @param {string} message - Error message
+ */
+function sendUnauthorized(req, res, message = 'Unauthorized') {
+    sendJSON(req, res, 401, {
         success: false,
         error: {
             message: message,
             code: 'UNAUTHORIZED'
         }
-    }));
+    });
 }
 
 module.exports = {

@@ -13,6 +13,14 @@
  * @param {Object} req - HTTP request object
  * @returns {Promise<Object>} Parsed JSON body
  */
+const zlib = require('zlib');
+
+/**
+ * Parse JSON body dari request
+ * 
+ * @param {Object} req - HTTP request object
+ * @returns {Promise<Object>} Parsed JSON body
+ */
 function parseBody(req) {
     return new Promise((resolve, reject) => {
         let body = '';
@@ -126,13 +134,36 @@ function getPath(url) {
 /**
  * Send JSON response
  * 
+ * @param {Object} req - Request object (needed for checking accept-encoding)
  * @param {Object} res - Response object
  * @param {number} statusCode - HTTP status code
  * @param {Object} data - Data to send
  */
-function sendJSON(res, statusCode, data) {
-    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(data));
+function sendJSON(req, res, statusCode, data) {
+    const jsonStr = JSON.stringify(data);
+    const acceptEncoding = req.headers['accept-encoding'] || '';
+
+    // Cek GZIP support
+    if (acceptEncoding.includes('gzip')) {
+        zlib.gzip(jsonStr, (err, buffer) => {
+            if (!err) {
+                res.writeHead(statusCode, {
+                    'Content-Type': 'application/json',
+                    'Content-Encoding': 'gzip'
+                });
+                res.end(buffer);
+            } else {
+                console.error('Compression error:', err);
+                // Fallback jika kompresi gagal
+                res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+                res.end(jsonStr);
+            }
+        });
+    } else {
+        // No Compression
+        res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+        res.end(jsonStr);
+    }
 }
 
 module.exports = {

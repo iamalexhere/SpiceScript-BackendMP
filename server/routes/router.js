@@ -125,12 +125,12 @@ async function handleAPIRequest(req, res) {
 
         // ============= 404 NOT FOUND =============
         // Jika tidak ada route yang match
-        return notFound(res);
+        return notFound(req, res);
 
     } catch (error) {
         // Catch any errors dan handle dengan error handler
         console.error('Router error:', error);
-        return handleError(error, res);
+        return handleError(error, req, res);
     }
 }
 
