@@ -44,12 +44,17 @@ const MIME_TYPES = {
 function serveFile(filePath, res, contentType, req) {
     // 1. Cek Accept-Encoding
     const acceptEncoding = req.headers['accept-encoding'] || '';
+    const fileName = path.basename(filePath);
+
+    console.log(`[serveFile] Serving: ${fileName}, type: ${contentType}`);
+    console.log(`[serveFile] Client Accept-Encoding: ${acceptEncoding}`);
 
     // 2. Siapkan Stream (Chunking otomatis via pipe)
     const rawStream = fs.createReadStream(filePath);
 
     // Handle error stream
     rawStream.on('error', (err) => {
+        console.error(`[serveFile] Error reading file: ${fileName}`, err.code);
         if (err.code === 'ENOENT') {
             res.writeHead(404, { 'Content-Type': 'text/html' });
             res.end('<h1>404 - File Not Found</h1>');
@@ -61,12 +66,14 @@ function serveFile(filePath, res, contentType, req) {
 
     // 3. Logic Kompresi
     if (acceptEncoding.includes('gzip')) {
+        console.log(`[serveFile] Using GZIP compression for ${fileName}`);
         res.writeHead(200, {
             'Content-Type': contentType,
             'Content-Encoding': 'gzip'
         });
         rawStream.pipe(zlib.createGzip()).pipe(res);
     } else {
+        console.log(`[serveFile] Serving ${fileName} uncompressed`);
         res.writeHead(200, { 'Content-Type': contentType });
         rawStream.pipe(res);
     }
