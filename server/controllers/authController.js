@@ -13,6 +13,7 @@ const Session = require('../models/Session')
 const { validateSignUp, validateSignIn } = require('../utils/validation')
 const { serializeCookie, clearCookie } = require('../utils/cookies')
 const config = require('../config/config')
+const { sendJSON } = require('../routes/apiHandler')
 
 /**
  * Sign Up - Register user baru
@@ -39,14 +40,11 @@ async function signUp(req, res) {
 
         // Jika validation gagal, return 400 dengan details
         if (!validationResult.valid) {
-            res.writeHead(400, { 'Content-Type': 'application/json' })
-            return res.end(
-                JSON.stringify({
-                    success: false,
-                    message: 'Validation failed',
-                    errors: validationResult.errors,
-                })
-            )
+            return sendJSON(req, res, 400, {
+                success: false,
+                message: 'Validation failed',
+                errors: validationResult.errors,
+            })
         }
 
         // Create user dengan User.create()
@@ -67,28 +65,20 @@ async function signUp(req, res) {
         )
 
         // Send response 201 dengan Set-Cookie header dan user data
-        res.writeHead(201, {
-            'Content-Type': 'application/json',
-            'Set-Cookie': cookie,
+        res.setHeader('Set-Cookie', cookie)
+        sendJSON(req, res, 201, {
+            success: true,
+            message: 'User registered and logged in successfully',
+            user: newUser,
         })
-        res.end(
-            JSON.stringify({
-                success: true,
-                message: 'User registered and logged in successfully',
-                user: newUser,
-            })
-        )
     } catch (error) {
         // Handle errors dengan try-catch
         console.error('Sign up error:', error.message)
-        res.writeHead(400, { 'Content-Type': 'application/json' })
-        res.end(
-            JSON.stringify({
-                success: false,
-                message: error.message,
-                code: 'SIGNUP_FAILED',
-            })
-        )
+        sendJSON(req, res, 400, {
+            success: false,
+            message: error.message,
+            code: 'SIGNUP_FAILED',
+        })
     }
 }
 
@@ -124,14 +114,11 @@ async function signIn(req, res) {
 
         // Jika invalid, return 401
         if (!user) {
-            res.writeHead(401, { 'Content-Type': 'application/json' })
-            return res.end(
-                JSON.stringify({
-                    success: false,
-                    message: 'Invalid email/username or password',
-                    code: 'INVALID_CREDENTIALS',
-                })
-            )
+            return sendJSON(req, res, 401, {
+                success: false,
+                message: 'Invalid email/username or password',
+                code: 'INVALID_CREDENTIALS',
+            })
         }
 
         // Create session
@@ -149,27 +136,19 @@ async function signIn(req, res) {
         )
 
         // Send response dengan Set-Cookie header
-        res.writeHead(200, {
-            'Content-Type': 'application/json',
-            'Set-Cookie': cookie,
+        res.setHeader('Set-Cookie', cookie)
+        sendJSON(req, res, 200, {
+            success: true,
+            message: 'Login successful',
+            user: user,
         })
-        res.end(
-            JSON.stringify({
-                success: true,
-                message: 'Login successful',
-                user: user,
-            })
-        )
     } catch (error) {
         console.error('Sign in error:', error.message)
-        res.writeHead(500, { 'Content-Type': 'application/json' })
-        res.end(
-            JSON.stringify({
-                success: false,
-                message: 'Internal Server Error during sign in',
-                code: 'SERVER_ERROR',
-            })
-        )
+        sendJSON(req, res, 500, {
+            success: false,
+            message: 'Internal Server Error during sign in',
+            code: 'SERVER_ERROR',
+        })
     }
 }
 
@@ -196,26 +175,18 @@ async function signOut(req, res) {
         const cookie = clearCookie(config.session.cookieName)
 
         // Send success response dengan clear cookie header
-        res.writeHead(200, {
-            'Content-Type': 'application/json',
-            'Set-Cookie': cookie,
+        res.setHeader('Set-Cookie', cookie)
+        sendJSON(req, res, 200, {
+            success: true,
+            message: 'Logout successful',
         })
-        res.end(
-            JSON.stringify({
-                success: true,
-                message: 'Logout successful',
-            })
-        )
     } catch (error) {
         console.error('Sign out error:', error.message)
-        res.writeHead(500, { 'Content-Type': 'application/json' })
-        res.end(
-            JSON.stringify({
-                success: false,
-                message: 'Internal Server Error during sign out',
-                code: 'SERVER_ERROR',
-            })
-        )
+        sendJSON(req, res, 500, {
+            success: false,
+            message: 'Internal Server Error during sign out',
+            code: 'SERVER_ERROR',
+        })
     }
 }
 
@@ -234,15 +205,13 @@ async function getCurrentUser(req, res) {
         const user = req.user;
 
         const responseData = {
-                success: true,
-                data: {
-                    user: user
-                }
+            success: true,
+            data: {
+                user: user
             }
+        }
 
-        res.writeHead(200, {'Content-Type': 'application/json'});
-
-        res.end(JSON.stringify(responseData));
+        sendJSON(req, res, 200, responseData);
     } catch (error) {
         console.log('Error getting current user: ', error);
     }

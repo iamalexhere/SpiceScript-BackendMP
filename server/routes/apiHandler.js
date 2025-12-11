@@ -13,32 +13,53 @@
  * @param {Object} req - HTTP request object
  * @returns {Promise<Object>} Parsed JSON body
  */
+const zlib = require('zlib');
+
+/**
+ * Parse JSON body dari request
+ * 
+ * @param {Object} req - HTTP request object
+ * @returns {Promise<Object>} Parsed JSON body
+ */
 function parseBody(req) {
     return new Promise((resolve, reject) => {
         let body = '';
+        let chunkCount = 0;
+        const startTime = Date.now();
+
+        console.log('[parseBody] Starting to parse request body');
 
         // Collect data chunks
         req.on('data', chunk => {
+            chunkCount++;
             body += chunk.toString();
+            console.log(`[parseBody] Received chunk ${chunkCount}, size: ${chunk.length} bytes, total: ${body.length} bytes`);
         });
 
         // When complete, parse JSON
         req.on('end', () => {
+            const duration = Date.now() - startTime;
+            console.log(`[parseBody] Request body complete after ${duration}ms, total size: ${body.length} bytes, chunks: ${chunkCount}`);
+
             try {
                 if (body) {
                     const parsed = JSON.parse(body);
+                    console.log('[parseBody] JSON parsed successfully, keys:', Object.keys(parsed));
                     resolve(parsed);
                 } else {
+                    console.log('[parseBody] Empty body, returning empty object');
                     resolve({});
                 }
             } catch (error) {
-                console.error('Error parsing JSON body:', error);
+                console.error('[parseBody] Error parsing JSON body:', error.message);
+                console.error('[parseBody] Body content (first 200 chars):', body.substring(0, 200));
                 reject(new Error('Invalid JSON'));
             }
         });
 
         // Handle error
         req.on('error', error => {
+            console.error('[parseBody] Request error:', error.message);
             reject(error);
         });
     });
@@ -126,13 +147,69 @@ function getPath(url) {
 /**
  * Send JSON response
  * 
+ * @param {Object} req - Request object (needed for checking accept-encoding)
  * @param {Object} res - Response object
  * @param {number} statusCode - HTTP status code
  * @param {Object} data - Data to send
  */
-function sendJSON(res, statusCode, data) {
-    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(data));
+function sendJSON(req, res, statusCode, data) {
+    const jsonStr = JSON.stringify(data);
+    const originalSize = Buffer.byteLength(jsonStr);
+    const acceptEncoding = req.headers['accept-encoding'] || '';
+    const startTime = Date.now();
+
+    console.log(`[sendJSON] Preparing response: status=${statusCode}, original size=${originalSize} bytes`);
+    console.log(`[sendJSON] Client Accept-Encoding: ${acceptEncoding}`);
+
+    // Cek GZIP support
+    if (acceptEncoding.includes('gzip')) {
+        console.log('[sendJSON] Client supports GZIP, attempting compression...');
+
+        zlib.gzip(jsonStr, (err, buffer) => {
+            const duration = Date.now() - startTime;
+
+            if (!err) {
+                const compressedSize = buffer.length;
+                const ratio = ((1 - compressedSize / originalSize) * 100).toFixed(2);
+
+                console.log(`[sendJSON] Compression successful in ${duration}ms`);
+                console.log(`[sendJSON] Original: ${originalSize} bytes → Compressed: ${compressedSize} bytes (${ratio}% reduction)`);
+
+                res.writeHead(statusCode, {
+                    'Content-Type': 'application/json',
+                    'Content-Encoding': 'gzip',
+                    'Content-Length': compressedSize
+                });
+                res.end(buffer);
+
+                console.log(`[sendJSON] Response sent with GZIP compression`);
+            } else {
+                console.error(`[sendJSON] Compression failed after ${duration}ms:`, err.message);
+                console.log('[sendJSON] Falling back to uncompressed response');
+
+                // Fallback jika kompresi gagal
+                res.writeHead(statusCode, {
+                    'Content-Type': 'application/json',
+                    'Content-Length': originalSize
+                });
+                res.end(jsonStr);
+
+                console.log(`[sendJSON] Response sent without compression (fallback)`);
+            }
+        });
+    } else {
+        // No Compression
+        console.log('[sendJSON] Client does not support GZIP, sending uncompressed');
+
+        res.writeHead(statusCode, {
+            'Content-Type': 'application/json',
+            'Content-Length': originalSize
+        });
+        res.end(jsonStr);
+
+        const duration = Date.now() - startTime;
+        console.log(`[sendJSON] Response sent without compression in ${duration}ms, size: ${originalSize} bytes`);
+    }
 }
 
 module.exports = {
