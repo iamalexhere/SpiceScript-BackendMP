@@ -1,1 +1,173 @@
-let currentUser=null;async function fetchRecipes(){try{const e=await fetch("/api/recipes",{credentials:"include"});if(!e.ok)throw new Error("Failed to fetch recipes");const t=await e.json();return t.success&&t.data.recipes||[]}catch(e){return console.error("Error fetching recipes:",e),alert("Failed to load recipes. Please refresh the page."),[]}}async function checkAuth(){try{const e=await fetch("/api/auth/me",{credentials:"include"});if(e.ok){const t=await e.json();if(t.success)return currentUser=t.data.user,!0}return currentUser=null,!1}catch(e){return console.error("Error checking auth:",e),currentUser=null,!1}}function renderCatalog(e){const t=document.getElementById("catalog"),n=document.querySelector(".search-message");if(!e||0===e.length)return n.innerHTML='\n            <h2 class="no-recipes-title">No recipes found!</h2>\n            <p class="no-recipes-text">Be the first to add one!</p>\n        ',void(t.innerHTML="");n.innerHTML="";const r=e.map((e=>`\n        <div class="card clickable" data-recipe-id="${e.id}">\n            <img src="${e.imagePath||"/images/default-recipe.jpg"}" class="image-container" alt="${e.recipeName}">\n            <div class="card-inner-container">\n                <h4><b>${e.recipeName}</b></h4>\n                <p>${e.description}</p>\n                <small class="recipe-author">by ${e.authorName||"Anonymous"}</small>\n            </div>\n        </div>\n    `)).join("");t.innerHTML=r;document.querySelectorAll(".card").forEach((e=>{e.addEventListener("click",(()=>{const t=e.getAttribute("data-recipe-id");window.location.href=`/details?id=${t}`}))}))}function updateNavButtons(){const e=document.getElementById("signInBtn"),t=document.getElementById("signOutBtn"),n=document.getElementById("createRecipeBtn");currentUser?(e.classList.add("hidden"),t.classList.remove("hidden"),n.classList.remove("hidden")):(e.classList.remove("hidden"),t.classList.add("hidden"),n.classList.add("hidden"))}async function handleSignOut(){try{(await fetch("/api/auth/signout",{method:"POST",credentials:"include"})).ok?(currentUser=null,updateNavButtons(),alert("Signed out successfully!"),await loadPage()):alert("Sign out failed. Please try again.")}catch(e){console.error("Sign out error:",e),alert("Network error during sign out.")}}async function loadPage(){await checkAuth(),updateNavButtons();const e=await fetchRecipes();renderCatalog(e);document.querySelector(".search-input").addEventListener("input",(t=>{const n=t.target.value;renderCatalog(e.filter((e=>e.recipeName.toLowerCase().includes(n))))}))}document.addEventListener("DOMContentLoaded",(()=>{const e=document.getElementById("signOutBtn");e&&e.addEventListener("click",handleSignOut),loadPage()}));
+/**
+ * Catalog - Frontend Integration with Backend API
+ * 
+ * Connects to:
+ * - GET /api/recipes - Fetch all recipes
+ * - GET /api/auth/me - Check authentication status
+ * - POST /api/auth/signout - Logout
+ */
+
+let currentUser = null;
+
+// Fetch recipes dari backend
+async function fetchRecipes() {
+    try {
+        const response = await fetch('/api/recipes', {
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch recipes');
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            return data.data.recipes || [];
+        }
+
+        return [];
+    } catch (error) {
+        console.error('Error fetching recipes:', error);
+        alert('Failed to load recipes. Please refresh the page.');
+        return [];
+    }
+}
+
+// Check authentication status
+async function checkAuth() {
+    try {
+        const response = await fetch('/api/auth/me', {
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                currentUser = data.data.user;
+                return true;
+            }
+        }
+
+        currentUser = null;
+        return false;
+    } catch (error) {
+        console.error('Error checking auth:', error);
+        currentUser = null;
+        return false;
+    }
+}
+
+// Render recipe cards
+function renderCatalog(recipes) {
+    const catalogContainer = document.getElementById('catalog');
+    const searchContainer = document.querySelector('.search-message');
+
+    if (!recipes || recipes.length === 0) {
+        searchContainer.innerHTML = `
+            <h2 class="no-recipes-title">No recipes found!</h2>
+            <p class="no-recipes-text">Be the first to add one!</p>
+        `;
+        catalogContainer.innerHTML = '';
+        return;
+    }
+
+    searchContainer.innerHTML = ''; // reset search message if found
+
+    const htmlCard = recipes.map(recipe => `
+        <div class="card clickable" data-recipe-id="${recipe.id}">
+            <img src="${recipe.imagePath || '/images/default-recipe.jpg'}" class="image-container" alt="${recipe.recipeName}">
+            <div class="card-inner-container">
+                <h4><b>${recipe.recipeName}</b></h4>
+                <p>${recipe.description}</p>
+                <small class="recipe-author">by ${recipe.authorName || 'Anonymous'}</small>
+            </div>
+        </div>
+    `).join('');
+
+    catalogContainer.innerHTML = htmlCard;
+
+    // Add click listeners to all cards
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            const recipeId = card.getAttribute('data-recipe-id');
+            window.location.href = `/details?id=${recipeId}`;
+        });
+    });
+}
+
+function updateNavButtons() {
+    const signInBtn = document.getElementById('signInBtn');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const createRecipeBtn = document.getElementById('createRecipeBtn');
+
+    if (currentUser) {
+        // User is logged in
+        signInBtn.classList.add('hidden');
+        signOutBtn.classList.remove('hidden');
+        createRecipeBtn.classList.remove('hidden');
+    } else {
+        // User is guest
+        signInBtn.classList.remove('hidden');
+        signOutBtn.classList.add('hidden');
+        createRecipeBtn.classList.add('hidden');
+    }
+}
+
+// Handle sign out
+async function handleSignOut() {
+    try {
+        const response = await fetch('/api/auth/signout', {
+            method: 'POST',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            currentUser = null;
+            updateNavButtons();
+            alert('Signed out successfully!');
+            // Optionally reload recipes
+            await loadPage();
+        } else {
+            alert('Sign out failed. Please try again.');
+        }
+    } catch (error) {
+        console.error('Sign out error:', error);
+        alert('Network error during sign out.');
+    }
+}
+
+// Initialize page
+async function loadPage() {
+    // Check authentication status
+    await checkAuth();
+
+    // Update nav buttons
+    updateNavButtons();
+
+    // Fetch and render recipes
+    const recipes = await fetchRecipes();
+    renderCatalog(recipes);
+
+    // Text input object in the HTML
+    const input = document.querySelector(".search-input");
+
+    // Attach event listener so whenever the input changes, it filters the recipes
+    input.addEventListener('input', (e) => {
+        const keywords = e.target.value;
+        const filteredRecipes = recipes.filter(recipe => recipe.recipeName.toLowerCase().includes(keywords));
+        renderCatalog(filteredRecipes);
+    });
+}
+
+// Set up event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    const signOutBtn = document.getElementById('signOutBtn');
+    if (signOutBtn) {
+        signOutBtn.addEventListener('click', handleSignOut);
+    }
+
+    // Load page data
+    loadPage();
+});
