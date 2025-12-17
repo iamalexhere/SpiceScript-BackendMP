@@ -23,7 +23,7 @@ const config = {
     // Konfigurasi untuk session management
     session: {
         // Session expiration dalam milidetik (24 jam)
-        maxAge: 24 * 60 * 60 * 1000, // 86400000 ms = 24 hours
+        maxAge: 30 * 60 * 1000, // 86400000 ms = 24 hours
     },
 
     // ============= COOKIE SETTINGS =============
