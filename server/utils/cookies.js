@@ -24,6 +24,9 @@ function parseCookies(cookieHeader) {
         return cookies;
     }
 
+    // DEBUG: Log raw cookie header
+    console.log('[Cookies] Parsing Raw Cookie Header:', cookieHeader);
+
     // Split berdasarkan semicolon dan process setiap cookie
     cookieHeader.split(';').forEach(cookie => {
         // Split berdasarkan equals sign pertama
@@ -37,6 +40,9 @@ function parseCookies(cookieHeader) {
         }
     });
 
+    // DEBUG: Log parsed cookies
+    console.log('[Cookies] Parsed Cookies:', cookies);
+
     return cookies;
 }
 
@@ -49,6 +55,10 @@ function parseCookies(cookieHeader) {
  * @returns {string} Cookie string untuk Set-Cookie header
  */
 function serializeCookie(name, value, options = {}) {
+    // DEBUG: Log serialization request
+    console.log(`[Cookies] Serializing Cookie: ${name}=${value.substring(0, 10)}... (truncated)`);
+    console.log('[Cookies] Cookie Options:', options);
+
     // Encode name dan value
     let cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
 
@@ -78,6 +88,9 @@ function serializeCookie(name, value, options = {}) {
         cookie += `; SameSite=${options.sameSite}`;
     }
 
+    // DEBUG: Log final cookie string
+    console.log('[Cookies] Final Set-Cookie String:', cookie);
+
     return cookie;
 }
 
@@ -91,6 +104,7 @@ function serializeCookie(name, value, options = {}) {
  * @returns {string} Cookie string untuk clear cookie
  */
 function clearCookie(name, options = {}) {
+    console.log(`[Cookies] Clearing Cookie: ${name}`);
     return serializeCookie(name, '', {
         ...options,
         maxAge: 0 // Set maxAge 0 untuk immediate expiration

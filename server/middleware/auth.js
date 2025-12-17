@@ -37,14 +37,18 @@ const { sendJSON } = require('../routes/apiHandler');
  */
 function authenticate(req, res, next) {
     try {
+        console.log('[AuthMiddleware] New request to protected route:', req.url);
+
         // 1. Parse cookies dari header
         const cookies = parseCookies(req.headers.cookie);
 
         // 2. Get session ID dari cookie
         const sessionId = cookies[config.session.cookieName];
+        console.log('[AuthMiddleware] Session ID from cookie:', sessionId);
 
         if (!sessionId) {
             // Tidak ada session cookie
+            console.log('[AuthMiddleware] No session ID found.');
             return sendUnauthorized(req, res, 'Session tidak ditemukan. Silakan login.');
         }
 
@@ -53,6 +57,7 @@ function authenticate(req, res, next) {
 
         if (!session) {
             // Session tidak valid atau expired
+            console.log('[AuthMiddleware] Invalid or expired session.');
             return sendUnauthorized(req, res, 'Session tidak valid atau sudah expired. Silakan login kembali.');
         }
 
@@ -61,9 +66,12 @@ function authenticate(req, res, next) {
 
         if (!user) {
             // User tidak ditemukan (mungkin sudah dihapus)
+            console.log('[AuthMiddleware] User not found for session.');
             Session.destroy(sessionId);
             return sendUnauthorized(req, res, 'User tidak ditemukan. Silakan login kembali.');
         }
+
+        console.log('[AuthMiddleware] Authentication successful for user:', user.username);
 
         // 5. Attach user dan session ke request object
         // Ini bisa diakses di handler selanjutnya via req.user dan req.session

@@ -54,6 +54,7 @@ async function signUp(req, res) {
         const sessionId = Session.create(newUser.id)
 
         // Serialize cookie dengan serializeCookie()
+        console.log('[Auth] Sign Up successful. Preparing to set session cookie...');
         const cookieOptions = {
             ...config.cookie,
             maxAge: config.session.maxAge,
@@ -99,14 +100,11 @@ async function signIn(req, res) {
         // Validate dengan validateSignIn()
         const validationResult = validateSignIn({ email, password })
         if (!validationResult.valid) {
-            res.writeHead(400, { 'Content-Type': 'application/json' })
-            return res.end(
-                JSON.stringify({
-                    success: false,
-                    message: 'Validation failed',
-                    errors: validationResult.errors,
-                })
-            )
+            return sendJSON(req, res, 400, {
+                success: false,
+                message: 'Validation failed',
+                errors: validationResult.errors,
+            })
         }
 
         // Validate credentials dengan User.validateCredentials()
@@ -125,6 +123,7 @@ async function signIn(req, res) {
         const sessionId = Session.create(user.id)
 
         // Serialize cookie
+        console.log('[Auth] Sign In successful. Preparing to set session cookie...');
         const cookieOptions = {
             ...config.cookie,
             maxAge: config.session.maxAge,
@@ -168,10 +167,12 @@ async function signOut(req, res) {
 
         if (sessionId) {
             // Destroy session dengan Session.destroy()
+            console.log('[Auth] Sign Out: Destroying session', sessionId);
             Session.destroy(sessionId)
         }
 
         // Clear cookie dengan clearCookie()
+        console.log('[Auth] Sign Out: Clearing cookie...');
         const cookie = clearCookie(config.session.cookieName)
 
         // Send success response dengan clear cookie header

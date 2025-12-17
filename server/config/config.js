@@ -22,8 +22,9 @@ const config = {
     // ============= SESSION SETTINGS =============
     // Konfigurasi untuk session management
     session: {
-        // Session expiration dalam milidetik (24 jam)
-        maxAge: 24 * 60 * 60 * 1000, // 86400000 ms = 24 hours
+        // Session expiration dalam milidetik (30 menit)
+        maxAge: 30 * 60 * 1000, 
+        cookieName: 'sessionId'
     },
 
     // ============= COOKIE SETTINGS =============
@@ -31,7 +32,7 @@ const config = {
     cookie: {
         httpOnly: true,      // XSS protection - cookie tidak bisa diakses via JavaScript
         sameSite: 'Strict',  // CSRF protection - cookie hanya dikirim untuk same-site requests
-        secure: false,       // Set true jika menggunakan HTTPS di production
+        secure: true,       // Wajib TRUE karena Client connect via HTTPS (Reverse Proxy SSL Termination)
         path: '/'           // Cookie berlaku untuk semua paths
     },
 
